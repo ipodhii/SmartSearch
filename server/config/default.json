@@ -1,0 +1,10 @@
+{
+  "smtp": {
+    "service": "gmail",
+    "user": "amitdanonmail@gmail.com",
+    "clientId": "273343245441-um6vgnk5lu44ba68cf42pthq3nu5n349.apps.googleusercontent.com",
+    "clientSecret": "v0KmgWqkBdxvILPq3m8qA0-b",
+    "refreshToken": "1//04PYk8Ja1MO5XCgYIARAAGAQSNwF-L9Ir2o5souzo-w-lCvxIEobzM879WEV5DpQZ0AGBdKum36u7Aj4pAL51LPV_F9nNBiusTic"
+  }
+  
+}
