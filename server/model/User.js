@@ -45,6 +45,7 @@ userSchema.methods.generateAutToken = function() {
 const User = mongoose.model('users', userSchema);
 
 function userValidation(user) {
+  console.log('dvfsfdsgfdfsgdf');
   const schema = {
     email: Joi.string(),
     phone: Joi.string().min(10),
