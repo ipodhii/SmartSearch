@@ -14,7 +14,6 @@ const settingSchema = new Schema({
 });
 const Setting = mongoose.model('Setting', settingSchema);
 function settingValidation(settings) {
-  console.log('dvfsfdsgfdfsgdf');
   const schema = {
     notification: Joi.string().required(),
     user: Joi.string().required(),
