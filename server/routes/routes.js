@@ -11,16 +11,18 @@ const adviceCtrl = new AdviceCtrl();
 const settingCtrl = new SettingCtrl();
 
 //routes
-router.get('/', auth, (req, res) => {
+router.get('/', (req, res) => {
   logger.log('info', 'cheking middleware');
-  res.send('The middleware working');
+  res.send('routing working');
 });
 
 router.get('/api/user', userCtrl.getUser);
 router.post('/api/register', userCtrl.addUser);
-router.post('/api/advice', adviceCtrl.addAdvice);
+router.post('/api/login', userCtrl.login);
 router.get('/api/advice', userCtrl.getAdvicesFromContacts);
 router.post('/api/sendMail', userCtrl.sendMail);
+
+router.post('/api/advice', adviceCtrl.addAdvice);
+
 router.post('/api/setting', settingCtrl.updateSetting);
-//router.post('/api/posts', auth, adviceCtrl.addPost);
 module.exports = router;
