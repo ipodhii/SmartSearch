@@ -13,7 +13,6 @@ class UserCtrl {
   async addUser(req, res) {
     logger.log('info', '/api/register');
     const {error} = userValidation(req.body);
-    console.log('dfhsdjkghdskd', error, req.body);
     if (error) {
       logger.log('error', error.details[0].message);
       return res
@@ -43,6 +42,7 @@ class UserCtrl {
     });
     try {
       user = await user.save();
+      logger.log('info', user);
       res.status(constants.HTTP_STATUS.OK).send(user);
     } catch (err) {
       logger.log('error', err);
@@ -76,8 +76,6 @@ class UserCtrl {
       expiresIn: constants.EXPIRIATION_TIME,
     });
     user = new UserView(user);
-    console.log('printUser', user);
-    console.log('herererer', token);
     return res
       .header('Authorization', token)
       .status(constants.HTTP_STATUS.OK)
@@ -130,7 +128,7 @@ class UserCtrl {
         console.log('printcheck', advices);
         let advicesView = [];
         for (let advice of advices) {
-          if(advice!={}){
+          if (advice != {}) {
             advicesView.push(new AdviceView(advice));
           }
         }
