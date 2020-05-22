@@ -1,5 +1,5 @@
 //myproject backup1
-import React, { Component } from 'react'
+import React, {Component} from 'react';
 import {
   AppRegistry,
   View,
@@ -17,7 +17,9 @@ import {
   Dimensions,
   ScrollView,
   PermissionsAndroid,
-} from 'react-native'
+} from 'react-native';
+import NetInfo from '@react-native-community/netinfo';
+
 import {
   Container,
   Content,
@@ -30,29 +32,34 @@ import {
   // Text,
 } from 'native-base';
 import Contacts from 'react-native-contacts';
-const CENTER_STYLE = { justifyContent: 'center', alignItems: 'center', flexDirection: 'column', flex: 1 };
+const CENTER_STYLE = {
+  justifyContent: 'center',
+  alignItems: 'center',
+  flexDirection: 'column',
+  flex: 1,
+};
 import Guid from 'uuid/v4';
-import SwipeBtn from "react-native-swipeout"
-import { Block, Text } from '../components';
+import SwipeBtn from 'react-native-swipeout';
+import {Block, Text} from '../components';
 import LinearGradient from 'react-native-linear-gradient';
-
+import url from '../config/config';
 //import { Button, Block, Input } from '../components';
-import { theme } from '../constants';
-import Images from '../assets/Themes/Images'
-
+import {theme} from '../constants';
+import Images from '../assets/Themes/Images';
+import {ido, mom, yotam, lior, dad, amit} from '../constants/mocks';
 //import {  styleFonts,sizeFonts,typeFonts } from '../assets/Themes/Fonts'
 
 const scale = Dimensions.get('window').width / 750;
-const HIGIPRIORITY=2;
-const MEDIUMRIORITY=1.5;
-const LOWPRIORITY=1.1;
+const HIGIPRIORITY = 2;
+const MEDIUMRIORITY = 1.5;
+const LOWPRIORITY = 1.1;
 
-
-const pdu = (<Image
-  source={Images.contactMem}
-  style={{ width: 55 * scale, height: 55 * scale, tintColor: 'white' }}
-/>);
-
+const pdu = (
+  <Image
+    source={Images.contactMem}
+    style={{width: 55 * scale, height: 55 * scale, tintColor: 'white'}}
+  />
+);
 
 const LOADING = (
   <View style={CENTER_STYLE}>
@@ -60,245 +67,313 @@ const LOADING = (
   </View>
 );
 export default class SignUp extends Component {
-
   constructor(props) {
     super(props);
+    this.checkInternetConnection();
     this.state = {
       isLoading: false,
-      contacts: [{ "postalAddresses": [], "thumbnailPath": "content://com.android.contacts/display_photo/9223372034707292161", "hasThumbnail": true, "note": "", "company": "", "familyName": "Danon", "middleName": null, "rawContactId": "9223372034707292161", "emailAddresses": [], "urlAddresses": [], "phoneNumbers": [], "department": "", "jobTitle": "", "suffix": null, "prefix": null, "givenName": "Amit", "recordID": "9223372034707292161" }, { "postalAddresses": [], "thumbnailPath": "", "hasThumbnail": false, "note": "", "company": "", "familyName": null, "middleName": null, "rawContactId": "154", "emailAddresses": [], "urlAddresses": [], "phoneNumbers": [{ "id": "48", "label": "mobile", "number": "+972 55-663-1107" }, { "id": "491", "label": "mobile", "number": "+972556631107" }], "department": "", "jobTitle": "", "suffix": null, "prefix": null, "givenName": "עידו", "recordID": "408" }, { "postalAddresses": [], "thumbnailPath": "", "hasThumbnail": false, "note": "", "company": "", "familyName": null, "middleName": null, "rawContactId": "164", "emailAddresses": [], "urlAddresses": [], "phoneNumbers": [{ "id": "64", "label": "mobile", "number": "055-660-6400" }, { "id": "541", "label": "mobile", "number": "0556606400" }], "department": "", "jobTitle": "", "suffix": null, "prefix": null, "givenName": "שמואל", "recordID": "160" }, { "postalAddresses": [], "thumbnailPath": "", "hasThumbnail": false, "note": "", "company": "", "familyName": null, "middleName": null, "rawContactId": "143", "emailAddresses": [], "urlAddresses": [], "phoneNumbers": [{ "id": "96", "label": "mobile", "number": "054-581-4636" }, { "id": "436", "label": "mobile", "number": "0545814636" }], "department": "", "jobTitle": "", "suffix": null, "prefix": null, "givenName": "תומר", "recordID": "138" }, { "postalAddresses": [], "thumbnailPath": "", "hasThumbnail": false, "note": "", "company": "", "familyName": null, "middleName": null, "rawContactId": "245", "emailAddresses": [], "urlAddresses": [], "phoneNumbers": [{ "id": "124", "label": "mobile", "number": "050-819-2089" }, { "id": "812", "label": "mobile", "number": "0508192089" }], "department": "", "jobTitle": "", "suffix": null, "prefix": null, "givenName": "הילה", "recordID": "347" }, { "postalAddresses": [], "thumbnailPath": "", "hasThumbnail": false, "note": "", "company": "", "familyName": "מכינה", "middleName": null, "rawContactId": "160", "emailAddresses": [], "urlAddresses": [], "phoneNumbers": [{ "id": "128", "label": "mobile", "number": "+972543149400" }, { "id": "521", "label": "mobile", "number": "+972543149400" }], "department": "", "jobTitle": "", "suffix": null, "prefix": null, "givenName": "נדב", "recordID": "205" }, { "postalAddresses": [], "thumbnailPath": "", "hasThumbnail": false, "note": "", "company": "", "familyName": null, "middleName": null, "rawContactId": "111", "emailAddresses": [], "urlAddresses": [], "phoneNumbers": [{ "id": "150", "label": "mobile", "number": "050-943-3350" }, { "id": "276", "label": "mobile", "number": "0509433350" }], "department": "", "jobTitle": "", "suffix": null, "prefix": null, "givenName": "אמא", "recordID": "116" }, { "postalAddresses": [], "thumbnailPath": "", "hasThumbnail": false, "note": "", "company": "", "familyName": null, "middleName": null, "rawContactId": "122", "emailAddresses": [], "urlAddresses": [], "phoneNumbers": [{ "id": "154", "label": "mobile", "number": "+972507900062" }, { "id": "331", "label": "mobile", "number": "+972507900062" }], "department": "", "jobTitle": "", "suffix": null, "prefix": null, "givenName": "אבא", "recordID": "124" }, { "postalAddresses": [], "thumbnailPath": "", "hasThumbnail": false, "note": "", "company": "", "familyName": null, "middleName": null, "rawContactId": "133", "emailAddresses": [], "urlAddresses": [], "phoneNumbers": [{ "id": "156", "label": "mobile", "number": "+972524324891" }, { "id": "386", "label": "mobile", "number": "+972524324891" }], "department": "", "jobTitle": "", "suffix": null, "prefix": null, "givenName": "גיא", "recordID": "200" }, { "postalAddresses": [], "thumbnailPath": "", "hasThumbnail": false, "note": "", "company": "", "familyName": null, "middleName": null, "rawContactId": "166", "emailAddresses": [], "urlAddresses": [], "phoneNumbers": [{ "id": "161", "label": "mobile", "number": "+972525778087" }, { "id": "551", "label": "mobile", "number": "+972525778087" }], "department": "", "jobTitle": "", "suffix": null, "prefix": null, "givenName": "בלובי", "recordID": "508" }, { "postalAddresses": [], "thumbnailPath": "", "hasThumbnail": false, "note": "", "company": "", "familyName": null, "middleName": null, "rawContactId": "110", "emailAddresses": [], "urlAddresses": [], "phoneNumbers": [{ "id": "165", "label": "mobile", "number": "+972545864228" }, { "id": "271", "label": "mobile", "number": "+972545864228" }], "department": "", "jobTitle": "", "suffix": null, "prefix": null, "givenName": "מתן", "recordID": "104" }, { "postalAddresses": [], "thumbnailPath": "", "hasThumbnail": false, "note": "", "company": "", "familyName": null, "middleName": null, "rawContactId": "127", "emailAddresses": [], "urlAddresses": [], "phoneNumbers": [{ "id": "173", "label": "mobile", "number": "+972502076524" }, { "id": "356", "label": "mobile", "number": "+972502076524" }], "department": "", "jobTitle": "", "suffix": null, "prefix": null, "givenName": "ליטל", "recordID": "134" }, { "postalAddresses": [], "thumbnailPath": "", "hasThumbnail": false, "note": "", "company": "", "familyName": "מכללה", "middleName": "פלאפון", "rawContactId": "173", "emailAddresses": [], "urlAddresses": [], "phoneNumbers": [{ "id": "581", "label": "other", "number": "+972 50-262-0923" }, { "id": "587", "label": "other", "number": "+972502620923" }], "department": "", "jobTitle": "", "suffix": null, "prefix": null, "givenName": "בוריס", "recordID": "498" }, { "postalAddresses": [], "thumbnailPath": "", "hasThumbnail": false, "note": "", "company": "", "familyName": null, "middleName": null, "rawContactId": "240", "emailAddresses": [], "urlAddresses": [], "phoneNumbers": [{ "id": "787", "label": "mobile", "number": "+972 52-425-8623" }, { "id": "793", "label": "mobile", "number": "+972524258623" }], "department": "", "jobTitle": "", "suffix": null, "prefix": null, "givenName": "רון", "recordID": "419" }, { "postalAddresses": [], "thumbnailPath": "", "hasThumbnail": false, "note": "", "company": "", "familyName": null, "middleName": null, "rawContactId": "247", "emailAddresses": [], "urlAddresses": [], "phoneNumbers": [{ "id": "813", "label": "mobile", "number": "050-234-7607" }, { "id": "819", "label": "mobile", "number": "0502347607" }], "department": "", "jobTitle": "", "suffix": null, "prefix": null, "givenName": "יקיר", "recordID": "350" }, { "postalAddresses": [], "thumbnailPath": "", "hasThumbnail": false, "note": "", "company": "", "familyName": null, "middleName": null, "rawContactId": "277", "emailAddresses": [], "urlAddresses": [], "phoneNumbers": [{ "id": "907", "label": "mobile", "number": "+972 54-586-3434" }, { "id": "915", "label": "mobile", "number": "+972545863434" }], "department": "", "jobTitle": "", "suffix": null, "prefix": null, "givenName": "רועי", "recordID": "380" }, { "postalAddresses": [], "thumbnailPath": "", "hasThumbnail": false, "note": "", "company": "", "familyName": null, "middleName": null, "rawContactId": "279", "emailAddresses": [], "urlAddresses": [], "phoneNumbers": [{ "id": "916", "label": "mobile", "number": "053-520-4670" }, { "id": "922", "label": "mobile", "number": "0535204670" }], "department": "", "jobTitle": "", "suffix": null, "prefix": null, "givenName": "עמיחי", "recordID": "430" }, { "postalAddresses": [], "thumbnailPath": "", "hasThumbnail": false, "note": "", "company": "", "familyName": "Indorz", "middleName": null, "rawContactId": "405", "emailAddresses": [], "urlAddresses": [], "phoneNumbers": [{ "id": "1141", "label": "mobile", "number": "050-630-4836" }, { "id": "1318", "label": "mobile", "number": "0506304836" }], "department": "", "jobTitle": "", "suffix": null, "prefix": null, "givenName": "ליאור", "recordID": "510" }, { "postalAddresses": [], "thumbnailPath": "", "hasThumbnail": false, "note": "", "company": "", "familyName": "Indorz", "middleName": null, "rawContactId": "364", "emailAddresses": [], "urlAddresses": [], "phoneNumbers": [{ "id": "1179", "label": "mobile", "number": "052-344-2121" }, { "id": "1185", "label": "mobile", "number": "0523442121" }], "department": "", "jobTitle": "", "suffix": null, "prefix": null, "givenName": "עידו", "recordID": "471" }, { "postalAddresses": [], "thumbnailPath": "", "hasThumbnail": false, "note": "", "company": "", "familyName": "Tcs", "middleName": null, "rawContactId": "368", "emailAddresses": [], "urlAddresses": [], "phoneNumbers": [{ "id": "1190", "label": "mobile", "number": "+972 50-230-2345" }, { "id": "1196", "label": "mobile", "number": "+972502302345" }], "department": "", "jobTitle": "", "suffix": null, "prefix": null, "givenName": "רותם", "recordID": "478" }, { "postalAddresses": [], "thumbnailPath": "", "hasThumbnail": false, "note": "", "company": "", "familyName": "Indorz", "middleName": null, "rawContactId": "370", "emailAddresses": [], "urlAddresses": [], "phoneNumbers": [{ "id": "1197", "label": "mobile", "number": "+972 50-910-7279" }, { "id": "1203", "label": "mobile", "number": "+972509107279" }], "department": "", "jobTitle": "", "suffix": null, "prefix": null, "givenName": "אור", "recordID": "479" }, { "postalAddresses": [], "thumbnailPath": "", "hasThumbnail": false, "note": "", "company": "", "familyName": "Indorz", "middleName": null, "rawContactId": "380", "emailAddresses": [], "urlAddresses": [], "phoneNumbers": [{ "id": "1226", "label": "mobile", "number": "+972 52-535-7383" }, { "id": "1232", "label": "mobile", "number": "+972525357383" }], "department": "", "jobTitle": "", "suffix": null, "prefix": null, "givenName": "יותם", "recordID": "485" }, { "postalAddresses": [], "thumbnailPath": "", "hasThumbnail": false, "note": "", "company": "", "familyName": "Indorz", "middleName": null, "rawContactId": "400", "emailAddresses": [], "urlAddresses": [], "phoneNumbers": [{ "id": "1298", "label": "mobile", "number": "+972 52-879-7969" }, { "id": "1300", "label": "mobile", "number": "+972 52-879-7969" }, { "id": "1305", "label": "mobile", "number": "+972528797969" }], "department": "", "jobTitle": "", "suffix": null, "prefix": null, "givenName": "חן", "recordID": "507" }],
-      errorMsg:false,
+      contacts: amit,
+      //   contacts: ido,
+      errorMsg: false,
       isSort: false,
       searchStr: '',
-      spliceContacts: []
-    }
+      spliceContacts: [],
+    };
   }
-  getContacts(){
-    PermissionsAndroid.request(
-      PermissionsAndroid.PERMISSIONS.READ_CONTACTS,
-      {
-        'title': 'Contacts',
-        'message': 'Smart search app would like to view your contacts.',
-        'buttonPositive': 'Please accept bare mortal'
-      }
-    ).then(() => {
-      const {navigation}=this.props;
+  checkInternetConnection = () => {
+    NetInfo.addEventListener(state => {
+      console.log('Connection type', state.type);
+      console.log('Is connected?', state.isConnected);
+    });
+  };
+  getContacts() {
+    PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.READ_CONTACTS, {
+      title: 'Contacts',
+      message: 'Smart search app would like to view your contacts.',
+      buttonPositive: 'Please accept bare mortal',
+    }).then(() => {
+      const {navigation} = this.props;
       Contacts.getAll((err, contacts) => {
-        if (err === 'denied'){
+        if (err === 'denied') {
           navigation.navigate('preSignUp');
         } else {
-         if(contacts.length>0){
-            this.setState({contacts})
-         }
+          if (contacts.length > 0) {
+            this.setState({contacts});
+          }
         }
-      })
-    })
+      });
+    });
   }
-  searchContacts = (str) => {
-    let { isSort, contacts, searchStr } = this.state
-    let res = []
+  searchContacts = str => {
+    let {isSort, contacts, searchStr} = this.state;
+    let res = [];
     // if(isSort&&searchStr!==''){
-    res = contacts.filter((member) => {
-      if (member && member.phoneNumbers && member.phoneNumbers.includes(str) ||
-        member && member.givenName && member.givenName.includes(str) ||
-        member && member.familyName && member.familyName.includes(str)) {
-        return member
+    res = contacts.filter(member => {
+      if (
+        (member && member.phoneNumbers && member.phoneNumbers.includes(str)) ||
+        (member && member.givenName && member.givenName.includes(str)) ||
+        (member && member.familyName && member.familyName.includes(str))
+      ) {
+        return member;
       }
-    })
-    console.log("printRes", res)
-    this.setState({ spliceContacts: res })
+    });
+    console.log('printRes', res);
+    this.setState({spliceContacts: res});
     //  }
-    return contacts
-  }
+    return contacts;
+  };
 
   renderSearch() {
     return (
-      <View style={{ paddingLeft: 60 * scale, paddingRight: 60 * scale, marginTop: 20 * scale, marginBottom: 20 * scale }}>
+      <View
+        style={{
+          paddingLeft: 60 * scale,
+          paddingRight: 60 * scale,
+          marginTop: 20 * scale,
+          marginBottom: 20 * scale,
+        }}>
         <View style={styles.singleField}>
-          <View style={{ marginTop: 30 * scale, lineHight: 10 }}>
-            <Image style={styles.iconBlk}
-              source={require('../assets/images/password_icon.png')} />
+          <View style={{marginTop: 30 * scale, lineHight: 10}}>
+            <Image
+              style={styles.iconBlk}
+              source={require('../assets/images/password_icon.png')}
+            />
           </View>
-          <TextInput style={styles.textFiled}
+          <TextInput
+            style={styles.textFiled}
             placeholder="Search"
             returnKeyType="go"
             underlineColorAndroid={'transparent'}
             placeholderTextColor="rgba(0,0,0,1)"
-
             value={this.state.searchStr}
-            onChangeText={(searchStr) => {
+            onChangeText={searchStr => {
               if (searchStr !== '') {
-                this.searchContacts(searchStr)
+                this.searchContacts(searchStr);
               }
-              this.setState({ searchStr, isSort: searchStr !== '' ? true : false })
-
+              this.setState({
+                searchStr,
+                isSort: searchStr !== '' ? true : false,
+              });
             }}
-          //  ref={(input) => this.passwordInput = input}
+            //  ref={(input) => this.passwordInput = input}
           />
         </View>
       </View>
-    )
+    );
   }
-  componentDidMount(){
-    this.getContacts();
+  componentDidMount() {
+    if (1 !== 1) {
+      this.getContacts();
+    }
   }
 
   render() {
-    const { navigation } = this.props;
-    let { contacts, spliceContacts, isSort, searchStr ,errorMsg} = this.state
-    let phones=[];
-    console.log("printContactsphones", phones)
+    const {navigation} = this.props;
+    let {contacts, spliceContacts, isSort, searchStr, errorMsg} = this.state;
+    let phones = [];
+    console.log('printContactsphones', phones);
     if (this.state.isLoading) {
-      return LOADING
+      return LOADING;
     }
-    let contactsArray = !isSort || searchStr === '' ? contacts : spliceContacts
+    let contactsArray = !isSort || searchStr === '' ? contacts : spliceContacts;
     return (
       <Block>
-      <ScrollView>
-        <View >
-          <Block flex={false} row center space="between" style={styles.header}>
-            <View style={{ marginTop: 20 * scale }}><Text h1 bold>Register</Text></View>
+        <ScrollView>
+          <View>
+            <Block
+              flex={false}
+              row
+              center
+              space="between"
+              style={styles.header}>
+              <View style={{marginTop: 20 * scale}}>
+                <Text h1 bold>
+                  Register
+                </Text>
+              </View>
+            </Block>
+            <View style={styles.header}>
+              <Text h4 gray2>
+                Modifiy priority to your contacts member list
+              </Text>
+            </View>
 
-          </Block>
-          <View style={styles.header}>
-            <Text h4 gray2 >
-              Modifiy priority to your contacts member list
-          </Text>
+            {this.renderSearch()}
+            {/* <View style={[styles.sectionSeperator]}/>*/}
+            {contactsArray && contactsArray.length > 0
+              ? contactsArray.map(
+                  function(member, index) {
+                    if (!member || !member.phoneNumbers[0]) return;
+                    phones.push(member.phoneNumbers[0].number);
+                    let rightOptions = [
+                      {
+                        text: 'Delete',
+                        onPress: function() {
+                          let nContactList = [...this.state.contacts];
+                          nContactList.splice(index, 1);
+                          this.setState({contacts: nContactList});
+                        }.bind(this),
+                        backgroundColor: '#ff5151',
+                      },
+                    ];
+                    let leftOptions = [
+                      {
+                        text: 'High',
+                        onPress: function() {
+                          let nContactList = [...this.state.contacts];
+                          nContactList[index].priority = HIGIPRIORITY;
+                          this.setState({contacts: nContactList});
+                        }.bind(this),
+                        backgroundColor: '#2BDA8E',
+                      },
+                      ,
+                      {
+                        text: 'Medium',
+                        onPress: function() {
+                          let nContactList = [...this.state.contacts];
+                          nContactList[index].priority = MEDIUMRIORITY;
+                          this.setState({contacts: nContactList});
+                        }.bind(this),
+                        backgroundColor: '#CCCCCC',
+                      },
+                      ,
+                      {
+                        text: 'Low',
+                        onPress: function() {
+                          let nContactList = [...this.state.contacts];
+                          nContactList[index].priority = LOWPRIORITY;
+                          this.setState({contacts: nContactList});
+                        }.bind(this),
+                        backgroundColor: '#CCCCCC',
+                      },
+                    ];
+                    return (
+                      <View style={[styles.itemContainerV2]} key={Guid()}>
+                        <SwipeBtn
+                          autoClose={true}
+                          right={rightOptions}
+                          left={leftOptions}
+                          buttonWidth={44}
+                          style={{height: 128 * scale}}>
+                          <TouchableOpacity
+                            onLongPress={() => {
+                              if (!this.state.contacts[index].highPriority) {
+                                console.log('longPressMakeTrue');
+                                let nContactList = [...this.state.contacts];
+                                nContactList[index].highPriority = true;
+                                this.setState({contacts: nContactList});
+                              } else {
+                                console.log('longPressMakeFalse');
+                                let nContactList = [...this.state.contacts];
+                                nContactList[index].highPriority = false;
+                                this.setState({contacts: nContactList});
+                              }
+                            }}>
+                            <View>
+                              <View>
+                                <View
+                                  style={[
+                                    !this.state.contacts[index].highPriority
+                                      ? styles.itemContainer
+                                      : styles.itemContainerPress,
+                                  ]}>
+                                  <View style={styles.itemIconContainer}>
+                                    <View style={styles.itemIconBackground}>
+                                      {pdu}
+                                    </View>
+                                  </View>
+
+                                  <View style={styles.itemMidContainer}>
+                                    <Text style={styles.itemMidText}>
+                                      {`${
+                                        member.givenName
+                                          ? member.givenName.replace(/\s/g, '')
+                                          : ''
+                                      } ${
+                                        member.familyName
+                                          ? member.familyName.replace(/\s/g, '')
+                                          : ''
+                                      }`}
+                                    </Text>
+                                    <View
+                                      style={
+                                        styles.itemMidDescriptionContainer
+                                      }>
+                                      <Text style={{color: '#6F7374'}}>
+                                        {member.phoneNumbers[0].number
+                                          ? member.phoneNumbers[0].number.replace(
+                                              /\s/g,
+                                              '',
+                                            )
+                                          : 'N/A'}
+                                      </Text>
+                                    </View>
+                                  </View>
+                                  <View style={styles.itemRightContainer}>
+                                    {/*<Text> {this.props.app && this.props.app.policy && this.props.app.policy.type ? this.props.app.policy.type : ''}</Text>*/}
+                                  </View>
+                                </View>
+                              </View>
+
+                              <View style={[styles.sectionSeperator]} />
+                            </View>
+                          </TouchableOpacity>
+                        </SwipeBtn>
+                      </View>
+                    );
+                  }.bind(this),
+                )
+              : LOADING}
           </View>
 
-          {this.renderSearch()}
-          {/* <View style={[styles.sectionSeperator]}/>*/}
-          {contactsArray && contactsArray.length > 0 ? contactsArray.map(function (member, index) {
-            if (!member || !member.phoneNumbers[0])
-              return;
-            console.log("printMemberxcxcxcxcx", member)
-            phones.push(member.phoneNumbers[0].number)
-            let rightOptions = [{
-              text: 'Delete',
-              onPress: function () {
-                let nContactList = [...this.state.contacts]
-                nContactList.splice(index, 1)
-                this.setState({ contacts: nContactList })
-              }.bind(this),
-              backgroundColor: "#ff5151",
-
-            },]
-            let leftOptions = [
-              {text: 'High',
-              onPress: function () {
-                let nContactList = [...this.state.contacts]
-                nContactList[index].priority = HIGIPRIORITY
-                this.setState({ contacts: nContactList })
-
-              }.bind(this),
-              backgroundColor: "#2BDA8E",
-          },
-              , {text: 'Medium',
-              onPress: function () {
-                let nContactList = [...this.state.contacts]
-                nContactList[index].priority = MEDIUMRIORITY
-                this.setState({ contacts: nContactList })
-              }.bind(this),
-              backgroundColor: "#CCCCCC",
-          },
-          , {text: 'Low',
-          onPress: function () {
-            let nContactList = [...this.state.contacts]
-            nContactList[index].priority = LOWPRIORITY
-            this.setState({ contacts: nContactList })
-          }.bind(this),
-          backgroundColor: "#CCCCCC",
-      },
-          ]
-            return (
-              <View style={[styles.itemContainerV2]} key={Guid()}>
-                <SwipeBtn
-                  autoClose={true}
-                  right={ rightOptions }
-                  left={leftOptions}
-                  buttonWidth={44}
-                  style={{ height: 128 * scale }}
-                >
-                  <TouchableOpacity onLongPress={() => {
-                    if (!this.state.contacts[index].highPriority) {
-                      console.log("longPressMakeTrue")
-                      let nContactList = [...this.state.contacts]
-                      nContactList[index].highPriority = true
-                      this.setState({ contacts: nContactList })
-                    }
-                    else {
-                      console.log("longPressMakeFalse")
-                      let nContactList = [...this.state.contacts]
-                      nContactList[index].highPriority = false
-                      this.setState({ contacts: nContactList })
-                    }
-
-                  }} >
-                    <View >
-                      <View>
-                        <View style={[!this.state.contacts[index].highPriority ? styles.itemContainer : styles.itemContainerPress]} >
-                          <View style={styles.itemIconContainer}>
-                            <View style={styles.itemIconBackground} >
-                              {pdu}
-                            </View>
-                          </View>
-
-                          <View style={styles.itemMidContainer}>
-                            <Text style={styles.itemMidText}>
-                              {`${member.givenName ? member.givenName.replace(/\s/g, '') : ''} ${member.familyName ? member.familyName.replace(/\s/g, '') : ''}`}
-                            </Text>
-                            <View style={styles.itemMidDescriptionContainer}>
-                              <Text style={{ color: '#6F7374' }}>
-                                {member.phoneNumbers[0].number ? member.phoneNumbers[0].number.replace(/\s/g, '') : "N/A"}
-                              </Text>
-                            </View>
-                          </View>
-                          <View style={styles.itemRightContainer}>
-                            {/*<Text> {this.props.app && this.props.app.policy && this.props.app.policy.type ? this.props.app.policy.type : ''}</Text>*/}
-                          </View>
-                        </View>
-                      </View>
-     
-                      <View style={[styles.sectionSeperator]} />
-                    </View>
-                  </TouchableOpacity>
-                </SwipeBtn>
-              </View>
-            )
-
-
-
-
-
-          }.bind(this)) : LOADING}
-        </View>
-
-        {errorMsg && (<View>
-                  <Text style={{ color: 'rgba(200, 0, 0, 0.8)', textAlign: 'center' }}>
-                      Failed to register.
-                  </Text>
-        </View>)}
-        <View style={{marginTop:60*scale}}/>
-            <TouchableOpacity onPress={() => {
-              let userContactsMember=[]
-              contacts.map(member=> {
-                if(member&&member.phoneNumbers[0]){
-                console.log("printMember", member)
-                  userContactsMember.push({phone:member.phoneNumbers[0].number})
+          {errorMsg && (
+            <View>
+              <Text
+                style={{color: 'rgba(200, 0, 0, 0.8)', textAlign: 'center'}}>
+                Failed to register.
+              </Text>
+            </View>
+          )}
+          <View style={{marginTop: 60 * scale}} />
+          <TouchableOpacity
+            onPress={() => {
+              let userContactsMember = [];
+              contacts.map(member => {
+                if (
+                  member &&
+                  member.phoneNumbers[0] &&
+                  member.phoneNumbers[0].number
+                ) {
+                  let phone = member.phoneNumbers[0].number;
+                  console.log('printPhoneBefore', phone);
+                  if (phone.slice(0, 4) === '+972') {
+                    phone = phone.replace('+972', '0');
+                  }
+                  phone = phone.split(' ').join('');
+                  phone = phone.split('-').join('');
+                  phone = phone.slice(0, 3) + '-' + phone.slice(3);
+                  console.log('printPhoneAfter', phone);
+                  userContactsMember.push({
+                    phone,
+                  });
                 }
-              })
-              console.log("checkuserContactsMember",JSON.stringify(userContactsMember))
+              });
+              console.log(
+                'checkuserContactsMember',
+                JSON.stringify(userContactsMember),
+              );
 
-              let body=JSON.stringify({
-                phone:navigation.getParam('phone'),
-                email:navigation.getParam('email'),
-                password:navigation.getParam('password'),
-                confirmPassword:navigation.getParam('confirmPassword'),
-                userContactsMember:JSON.stringify(userContactsMember)
-              })
-              console.log("printcheckphonenenenene",body)
-              
-              fetch('http://192.168.43.211:5000/api/register',{
-                //fetch('http://10.0.0.2:5000/api/register',{
+              let body = JSON.stringify({
+                phone: navigation.getParam('phone'),
+                email: navigation.getParam('email'),
+                password: navigation.getParam('password'),
+                confirmPassword: navigation.getParam('confirmPassword'),
+                userContactsMember: JSON.stringify(userContactsMember),
+              });
+              console.log('printcheckphonenenenene', JSON.stringify(body));
+              console.log('printUrl', `${url}api/register`);
+
+              fetch(`${url}api/register`, {
                 method: 'POST',
                 headers: {
                   Accept: 'application/json',
@@ -306,37 +381,44 @@ export default class SignUp extends Component {
                 },
                 body,
               })
-              .then((res)=>{
-                const status=res.status;
-                if(status!==200){
-                  this.setState({errorMsg:true})
-                }
-                else{
-                  console.log("printNewUser",res.json())
-                  this.setState({errorMsg:false,},()=>navigation.navigate('Browse',{user:res.json()}))
-                }
-              })
-              .catch((err)=>{
-                console.log("errorregister",err)
-                this.setState({errorMsg:true})
-              })  
-             }}>
-              <LinearGradient start={{ x: 4, y: 2 }} end={{ x: 0, y: 0 }} colors={['#FFFFFF', '#EFEFEF']}
-                opacity={0.8} style={styles.linearGradient}>
-                <Text h3 gray2 style={[styles.buttonText, { marginTop: theme.sizes.padding / 2 }]}>
-                  Confirm
-                  </Text>
-              </LinearGradient>
-            </TouchableOpacity>
-      </ScrollView>
+                .then(res => {
+                  const status = res.status;
+                  if (status !== 200) {
+                    this.setState({errorMsg: true});
+                  } else {
+                    console.log('printNewUser', res.json());
+                    this.setState({errorMsg: false}, () =>
+                      navigation.navigate('Browse', {user: res.json()}),
+                    );
+                  }
+                })
+                .catch(err => {
+                  console.log('errorregister', err);
+                  this.setState({errorMsg: true});
+                });
+            }}>
+            <LinearGradient
+              start={{x: 4, y: 2}}
+              end={{x: 0, y: 0}}
+              colors={['#FFFFFF', '#EFEFEF']}
+              opacity={0.8}
+              style={styles.linearGradient}>
+              <Text
+                h3
+                gray2
+                style={[
+                  styles.buttonText,
+                  {marginTop: theme.sizes.padding / 2},
+                ]}>
+                Confirm
+              </Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        </ScrollView>
       </Block>
     );
-
-
   }
 }
-
-
 
 /*
 
@@ -350,31 +432,30 @@ const styles = StyleSheet.create({
     margin: 10,
     //   color: '#ffffff',
     backgroundColor: 'transparent',
-
   },
   linearGradient: {
-    width: "85%",
+    width: '85%',
     // height:100*scale,
     //  flex: 0.3,
-    marginLeft:50*scale,
+    marginLeft: 50 * scale,
     borderRadius: 6,
     height: 16 * 3,
     justifyContent: 'center',
     marginVertical: 25 / 3,
- // marginTop: 0 * scale,
-    shadowColor: "#323643",
-    shadowOffset: { width: 0, height: 2 },
+    // marginTop: 0 * scale,
+    shadowColor: '#323643',
+    shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.1,
     shadowRadius: 10,
   },
   header: {
     paddingLeft: 70 * scale,
-    paddingTop: 20 * scale
+    paddingTop: 20 * scale,
   },
   itemContainerV2: {
     height: 126 * scale,
-    backgroundColor: "white",
-    marginLeft: 20 * scale
+    backgroundColor: 'white',
+    marginLeft: 20 * scale,
   },
   itemIconBackground: {
     width: 90 * scale,
@@ -401,33 +482,32 @@ const styles = StyleSheet.create({
   },
   itemContainer: {
     height: 128 * scale,
-    backgroundColor: "white",
+    backgroundColor: 'white',
     flexDirection: 'row',
   },
   itemContainerPress: {
     height: 128 * scale,
-    backgroundColor: "#05f2b3",
+    backgroundColor: '#05f2b3',
     flexDirection: 'row',
   },
   itemMidText: {
     color: 'black',
     marginBottom: 5 * scale,
-    fontWeight: "bold"
+    fontWeight: 'bold',
     //marginLeft:40*scale
   },
   itemMidDescriptionContainer: {
     flexDirection: 'row',
     // marginLeft:40*scale,
     //  marginBottom: 10 * scale,
-    color: '#F7F7F7'
+    color: '#F7F7F7',
   },
   itemRightContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'flex-end',
-    width: "40%",
-    marginLeft: 80 * scale
-
+    width: '40%',
+    marginLeft: 80 * scale,
   },
   navigateBack: {
     width: 150 * scale,
@@ -439,7 +519,7 @@ const styles = StyleSheet.create({
   sectionSeperator: {
     height: 2 * scale,
     width: 750 * scale,
-    backgroundColor: '#F5F5F5'
+    backgroundColor: '#F5F5F5',
   },
   scheduleItemContainer: {
     height: 138 * scale,
@@ -447,7 +527,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   scheduleItemLeftPan: {
-    width: "40%",
+    width: '40%',
     justifyContent: 'flex-start',
     alignItems: 'center',
     flexDirection: 'row',
@@ -462,7 +542,7 @@ const styles = StyleSheet.create({
   sectionSeperator: {
     height: 2 * scale,
     width: 750 * scale,
-    backgroundColor: '#e2e6e7'
+    backgroundColor: '#e2e6e7',
   },
   bodycont: {
     flex: 1,
@@ -473,15 +553,12 @@ const styles = StyleSheet.create({
   },
   headerBlk: {
     flex: 1,
-
   },
   tab: {
     backgroundColor: '#00DFDE',
-
   },
   tabbar: {
     backgroundColor: '#00DFDE',
-
   },
   gradeBlk: {
     flex: 1,
@@ -492,7 +569,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexGrow: 1,
     justifyContent: 'center',
-
   },
   logo: {
     width: 100,
@@ -525,14 +601,12 @@ const styles = StyleSheet.create({
     width: 300,
     padding: 0,
     //  paddingBottom: 10,
-
   },
   buttonContainer: {
     alignItems: 'center',
     flexGrow: 1,
     justifyContent: 'center',
     paddingTop: 20,
-
   },
   submitButton: {
     backgroundColor: '#00e0ee',
@@ -541,14 +615,14 @@ const styles = StyleSheet.create({
     paddingLeft: 30,
     paddingRight: 30,
     width: 200,
-    flexDirection: 'row'
+    flexDirection: 'row',
   },
   submitButtonText: {
     fontSize: 15,
     textAlign: 'center',
     color: '#FFF',
     fontWeight: 'bold',
-    flex: 1
+    flex: 1,
   },
 
   singleField: {
@@ -568,7 +642,6 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
 
-
   buttonField: {
     flexDirection: 'row',
     justifyContent: 'center',
@@ -583,7 +656,7 @@ const styles = StyleSheet.create({
   forgotPass: {
     color: '#00a2ee',
     fontSize: 14,
-    textDecorationLine: "underline",
+    textDecorationLine: 'underline',
   },
 
   iconBlk: {
@@ -593,8 +666,11 @@ const styles = StyleSheet.create({
     marginRight: 10,
     marginBottom: 10,
   },
-});
-
+}); /*}*/ /*
+</View>
+</View>
+</View>
+*/
 
 /*
  return (
@@ -618,15 +694,8 @@ const styles = StyleSheet.create({
                 </View>
               </View>
               <View style={styles.itemRightContainer}>
-                {/*<Text> {this.props.app && this.props.app.policy && this.props.app.policy.type ? this.props.app.policy.type : ''}</Text>*//*}*/
-/*
-</View>
-</View>
-</View>
-*/
-
-
-{/*<View style={styles.scheduleItemContainer} >
+                {/*<Text> {this.props.app && this.props.app.policy && this.props.app.policy.type ? this.props.app.policy.type : ''}</Text>*/ {
+  /*<View style={styles.scheduleItemContainer} >
                   <View style={styles.itemMidContainer}>
                  <Text style={styles.itemMidText}>
                  {`${member.givenName?member.givenName.replace(/\s/g, ''):''} ${member.familyName?member.familyName.replace(/\s/g, ''):''}`}
@@ -647,12 +716,14 @@ const styles = StyleSheet.create({
                                        </Text>
     
                                    </View>
-                                  */}
-{/* </View>*/ }
-                              /*
+                                  */
+}
+{
+  /* </View>*/
+}
+/*
  <View style={[styles.sectionSeperator]} />
 </View>
 );
 
 */
-
