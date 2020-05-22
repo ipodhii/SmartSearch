@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import {AsyncStorage} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-
+import url from '../config/config';
 import {Block, Text} from '../components';
 import {theme} from '../constants';
 import Images from '../assets/Themes/Images';
@@ -21,6 +21,10 @@ const VALID_EMAIL = 'contact@react-ui-kit.com';
 const VALID_PASSWORD = 'subscribe';
 const scale = Dimensions.get('window').width / 750;
 
+function convertToJson(res) {
+  if (!res) return res;
+  return res.json();
+}
 export default class Login extends Component {
   state = {
     email: 'amit@indorz.co',
@@ -132,21 +136,23 @@ export default class Login extends Component {
                 });
                 console.log('pressed', body);
 
-                const res = await fetch('http://10.0.0.2:5000/api/login', {
-                  method: 'POST',
-                  headers: {
-                    Accept: 'application/json',
-                    'Content-Type': 'application/json',
-                  },
-                  body,
-                });
                 try {
-                  const tmp = await res.json();
-                  console.log('123456789', tmp);
+                  const res = await fetch(`${url}api/login`, {
+                    method: 'POST',
+                    headers: {
+                      Accept: 'application/json',
+                      'Content-Type': 'application/json',
+                    },
+                    body,
+                  });
+                  const tmp = await convertToJson(res);
+
+                  console.log('restmmmppppp', tmp);
                   this.setState({errorMsg: false}, () =>
                     navigation.navigate('Browse', {user: tmp}),
                   );
                 } catch (e) {
+                  console.log('printeeee', e);
                   this.setState({errorMsg: true});
                 }
               }}>
