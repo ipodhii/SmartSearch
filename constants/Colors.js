@@ -29,6 +29,7 @@ const colors = {
   zoneItemTextDisable: '#a6a6a6',
   segmentSelected: '#05f2b3',
   listRowSeperator: '#f5f5f5',
+
   itemSeperator: '#f5f5f5',
   sectionSeperator: '#e2e6e7',
   cylinderText: '#120083',
@@ -38,8 +39,6 @@ const colors = {
   createZoneButton: '#00e0ee',
   link: '#00a2ee',
   warning: '#ff5151',
-  black: '#000',
-  white: '#fff',
-};
+}
 
-export default colors;
+export default colors
