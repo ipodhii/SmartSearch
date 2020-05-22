@@ -13,6 +13,7 @@ import {
 import {Card, Badge, Button, Block, Text} from '../components';
 import {theme, mocks} from '../constants';
 import Images from '../assets/Themes/Images';
+import RNPickerSelect from 'react-native-picker-select';
 
 let jsgraphs = require('js-graph-algorithms');
 const {width} = Dimensions.get('window');
@@ -20,8 +21,10 @@ const scale = Dimensions.get('window').width / 750;
 const API_KEY = 'AIzaSyBec195_3M-GvCsL83hXSwQpaDmQruO3HU';
 const RESTURANTS = 'resturants';
 const CULTURE = 'culture';
-const TOURING_PLACES = 'point+of+interest';
+const SEARCH_PLACE = 'search place';
 
+const TOURING_PLACES = 'point+of+interest';
+import {countries as countriesOptions} from '../constants/mocks';
 import ActionButton from 'react-native-action-button';
 
 const pdu = (
@@ -36,6 +39,10 @@ function convertToJson(res) {
   return res.json();
 }
 
+const cOptions = countriesOptions.map(c => {
+  return {label: c.name, value: c.name};
+});
+console.log('countries', countriesOptions);
 class Browse extends Component {
   state = {
     active: 'Restaurants',
@@ -43,45 +50,46 @@ class Browse extends Component {
     data: [],
     loading: false,
     country: 'Israel',
+    city: 'jerusalem',
+    searchText: '',
+    countriesOptions: cOptions,
   };
 
   //get data from google
   componentDidMount() {
     //  this.setState({ categories: this.props.categories });
-    this.getData();
+    let {navigation} = this.props;
+    let user = navigation.getParam('user');
+    let userContactsMember = JSON.parse(user.userContactsMember);
+    this.setState({userContactsMember}, () => this.getData());
   }
 
   getData = () => {
-    let {categories, active} = this.state;
+    let {active} = this.state;
     this.fetchData(active).then(res => {
-      console.log('xxx999printRes', JSON.stringify(res));
       this.setState({data: res});
     });
   };
+
 
   fetchData = async searchType => {
     let url;
     switch (searchType.toLowerCase()) {
       case RESTURANTS:
-        console.log('checkswitchcase', RESTURANTS);
-        //  url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=places+in+jerusalem+restaurant&key=AIzaSyBec195_3M-GvCsL83hXSwQpaDmQruO3HU`;
         //  url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=places+in+jerusalem+${RESTURANTS}&key=${API_KEY}`;
         break;
       case TOURING_PLACES:
-        console.log('checkswitchcase', TOURING_PLACES);
-
         //    url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=places+in+jerusalem+${TOURING_PLACES}&key=${API_KEY}`;
         break;
       case CULTURE:
-        console.log('checkswitchcase', CULTURE);
-
         //   url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=places+in+jerusalem+${CULTURE}&key=${API_KEY}`;
         break;
+      case CULTURE:
+            //   url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=places+in+jerusalem+${CULTURE}&key=${API_KEY}`;
+            break;
       default:
-        console.log('checkswitchcasedefault', RESTURANTS);
-        //   url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=places+in+jerusalem+restaurant&key=AIzaSyBec195_3M-GvCsL83hXSwQpaDmQruO3HU`;
-
-        //   url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=places+in+jerusalem+${RESTURANTS}&key=${API_KEY}`;
+        let placeName=searchType;
+      //  let url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${placeName}&key=${API_KEY}`;
         break;
     }
     this.setState({loading: true});
@@ -164,9 +172,9 @@ class Browse extends Component {
             returnKeyType="go"
             underlineColorAndroid={'transparent'}
             placeholderTextColor="rgba(0,0,0,1)"
-            value={this.state.password2}
-            onChangeText={password2 => this.setState({password2})}
-            ref={input => (this.passwordInput = input)}
+            value={this.state.searchText}
+            onChangeText={searchText => this.setState({searchText})}
+            //  ref={input => (this.passwordInput = input)}
           />
         </View>
       </View>
@@ -174,10 +182,17 @@ class Browse extends Component {
   }
   render() {
     const {profile, navigation} = this.props;
-    const {categories, datamactive, active, data, country} = this.state;
+    const {
+      categories,
+      datamactive,
+      active,
+      data,
+      country,
+      searchText,
+    } = this.state;
     const tabs = ['Restaurants', 'Touring places', 'Culture'];
 
-    console.log('printState', navigation.getParam('user'));
+    console.log('printsearchText', searchText, active);
     return (
       <Block>
         <Block flex={false} row center space="between" style={styles.header}>
@@ -197,6 +212,22 @@ class Browse extends Component {
         <Block flex={false} row style={styles.tabs}>
           {tabs.map(tab => this.renderTab(tab))}
         </Block>
+        <View style={{flexDirection: 'row', justifyContent: 'center'}}>
+          <View style={{width: '40%'}}>
+            <RNPickerSelect
+              placeholder={{label: 'country', value: ''}}
+              onValueChange={country => this.setState({country})}
+              items={this.state.countriesOptions}
+            />
+          </View>
+          <View style={{width: '40%'}}>
+            <RNPickerSelect
+              placeholder={{label: 'city', value: ''}}
+              onValueChange={country => this.setState({country})}
+              items={this.state.countriesOptions}
+            />
+          </View>
+        </View>
 
         {this.renderSearch()}
 
@@ -204,16 +235,6 @@ class Browse extends Component {
           showsVerticalScrollIndicator={false}
           // style={{ paddingVertical: theme.sizes.base * 2}}
         >
-          <Picker
-            onValueChange={country => {
-              return this.setState({country});
-            }}
-            style={[{width: '70%', height: 70 * scale}]}
-            selectedValue={country}
-            itemStyle={styles.titleStyle}>
-            {/*TYPE_OPTIONS.map(item => (<Picker.Item key={item.label} value={item} label={item.label} />))*/}
-          </Picker>
-
           <Block>
             {categories.map(category => (
               <TouchableOpacity
