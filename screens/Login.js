@@ -16,24 +16,28 @@ import url from '../config/config';
 import {Block, Text} from '../components';
 import {theme} from '../constants';
 import Images from '../assets/Themes/Images';
-
 const VALID_EMAIL = 'contact@react-ui-kit.com';
 const VALID_PASSWORD = 'subscribe';
 const scale = Dimensions.get('window').width / 750;
-
+import {amitInfo} from '../constants/mocks';
 function convertToJson(res) {
   if (!res) return res;
   return res.json();
 }
 export default class Login extends Component {
-  state = {
-    email: 'amit@indorz.co',
-    password: '12345678',
-    confirmPassword: '12345678',
-    errorMsg: false,
-    errors: [],
-    loading: false,
-  };
+  constructor(props) {
+    super(props);
+    let {email, password, confirmPassword} = amitInfo;
+    this.state = {
+      email: email || '',
+      password: password || '',
+      confirmPassword: confirmPassword || '',
+      errorMsg: false,
+      errors: [],
+      loading: false,
+    };
+  }
+
   isToken(header) {
     if (!header.map || !header.map.authorization) {
       return false;
@@ -136,7 +140,6 @@ export default class Login extends Component {
                 </View>
               )}
             </View>
-            
           </KeyboardAvoidingView>
         </Block>
         <Block middle flex={0.5} margin={[0, theme.sizes.padding * 2]}>
@@ -159,8 +162,6 @@ export default class Login extends Component {
                   body,
                 });
                 const tmp = await convertToJson(res);
-
-                console.log('restmmmppppp', tmp);
                 this.setState({errorMsg: false}, () =>
                   navigation.navigate('Browse', {user: tmp}),
                 );
@@ -188,23 +189,11 @@ export default class Login extends Component {
               </View>
             </LinearGradient>
           </TouchableOpacity>
+          <View style={{marginTop: '3%'}} />
           <TouchableOpacity onPress={() => navigation.navigate('Forgot')}>
-            <LinearGradient
-              start={{x: 4, y: 2}}
-              end={{x: 0, y: 0}}
-              colors={['#FFFFFF', '#EFEFEF']}
-              opacity={0.8}
-              style={styles.linearGradient}>
-              <Text
-                h3
-                secondary
-                style={[
-                  styles.buttonTextForgotStyle,
-                  {marginTop: theme.sizes.padding / 2},
-                ]}>
-                Forgot your password?
-              </Text>
-            </LinearGradient>
+            <Text gray h4 center style={{textDecorationLine: 'underline'}}>
+              Forgot password?
+            </Text>
           </TouchableOpacity>
         </Block>
       </Block>

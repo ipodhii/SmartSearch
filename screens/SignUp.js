@@ -32,12 +32,6 @@ import {
   // Text,
 } from 'native-base';
 import Contacts from 'react-native-contacts';
-const CENTER_STYLE = {
-  justifyContent: 'center',
-  alignItems: 'center',
-  flexDirection: 'column',
-  flex: 1,
-};
 import Guid from 'uuid/v4';
 import SwipeBtn from 'react-native-swipeout';
 import {Block, Text} from '../components';
@@ -53,13 +47,20 @@ const scale = Dimensions.get('window').width / 750;
 const HIGIPRIORITY = 2;
 const MEDIUMRIORITY = 1.5;
 const LOWPRIORITY = 1.1;
-
+const CENTER_STYLE = {
+  justifyContent: 'center',
+  alignItems: 'center',
+  flexDirection: 'column',
+  flex: 1,
+};
 const pdu = (
   <Image
     source={Images.contactMem}
     style={{width: 55 * scale, height: 55 * scale, tintColor: 'white'}}
   />
 );
+
+
 
 const LOADING = (
   <View style={CENTER_STYLE}>
@@ -72,8 +73,8 @@ export default class SignUp extends Component {
     this.checkInternetConnection();
     this.state = {
       isLoading: false,
-      contacts: amit,
-      //   contacts: ido,
+      //  contacts: amit,
+      contacts: ido,
       errorMsg: false,
       isSort: false,
       searchStr: '',
@@ -193,8 +194,9 @@ export default class SignUp extends Component {
               </View>
             </Block>
             <View style={styles.header}>
-              <Text h4 gray2>
-                Modifiy priority to your contacts member list
+              <Text h4 secondary>
+                Modifiy priority for your contacts member by swipe left or
+                remove them by swipe right
               </Text>
             </View>
 
@@ -224,7 +226,7 @@ export default class SignUp extends Component {
                           nContactList[index].priority = HIGIPRIORITY;
                           this.setState({contacts: nContactList});
                         }.bind(this),
-                        backgroundColor: '#2BDA8E',
+                        backgroundColor: '#51B72B',
                       },
                       ,
                       {
@@ -257,6 +259,7 @@ export default class SignUp extends Component {
                           style={{height: 128 * scale}}>
                           <TouchableOpacity
                             onLongPress={() => {
+                              /*
                               if (!this.state.contacts[index].highPriority) {
                                 console.log('longPressMakeTrue');
                                 let nContactList = [...this.state.contacts];
@@ -268,6 +271,7 @@ export default class SignUp extends Component {
                                 nContactList[index].highPriority = false;
                                 this.setState({contacts: nContactList});
                               }
+                              */
                             }}>
                             <View>
                               <View>
@@ -345,7 +349,10 @@ export default class SignUp extends Component {
                   member.phoneNumbers[0].number
                 ) {
                   let phone = member.phoneNumbers[0].number;
-                  console.log('printPhoneBefore', phone);
+                  let name = member.givenName;
+                  let priority = member.priority || LOWPRIORITY;
+                  let lname = member.familyName;
+                  console.log('printPhoneBefore', priority, name);
                   if (phone.slice(0, 4) === '+972') {
                     phone = phone.replace('+972', '0');
                   }
@@ -355,6 +362,9 @@ export default class SignUp extends Component {
                   console.log('printPhoneAfter', phone);
                   userContactsMember.push({
                     phone,
+                    name,
+                    lname,
+                    priority,
                   });
                 }
               });
@@ -405,7 +415,7 @@ export default class SignUp extends Component {
               style={styles.linearGradient}>
               <Text
                 h3
-                gray2
+                secondary
                 style={[
                   styles.buttonText,
                   {marginTop: theme.sizes.padding / 2},
@@ -414,6 +424,12 @@ export default class SignUp extends Component {
               </Text>
             </LinearGradient>
           </TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate('preSignUp')}>
+            <Text gray h4 center style={{textDecorationLine: 'underline'}}>
+              Back
+            </Text>
+          </TouchableOpacity>
+          <View style={{marginTop: '3%'}} />
         </ScrollView>
       </Block>
     );
@@ -487,8 +503,9 @@ const styles = StyleSheet.create({
   },
   itemContainerPress: {
     height: 128 * scale,
-    backgroundColor: '#05f2b3',
+    backgroundColor: '#51B72B',
     flexDirection: 'row',
+    opacity: 0.8,
   },
   itemMidText: {
     color: 'black',
@@ -666,11 +683,11 @@ const styles = StyleSheet.create({
     marginRight: 10,
     marginBottom: 10,
   },
-}); /*}*/ /*
+}); /*
 </View>
 </View>
 </View>
-*/
+*/ /*}*/
 
 /*
  return (

@@ -15,20 +15,25 @@ import LinearGradient from 'react-native-linear-gradient';
 import {Block, Text} from '../components';
 import {theme} from '../constants';
 import Images from '../assets/Themes/Images';
-
+import {idoInfo} from '../constants/mocks';
 const VALID_EMAIL = 'contact@react-ui-kit.com';
 const VALID_PASSWORD = 'subscribe';
 const scale = Dimensions.get('window').width / 750;
 
 export default class preSignUp extends Component {
-  state = {
-    phone: '055-6678224',
-    email: 'amit@indorz.co',
-    password: '12345678',
-    confirmPassword: '12345678',
-    errors: [],
-    loading: false,
-  };
+  constructor(props) {
+    super(props);
+
+    let {phone, email, password, confirmPassword} = idoInfo;
+    this.state = {
+      phone: phone || '',
+      email: email || '',
+      password: password || '',
+      confirmPassword: confirmPassword || '',
+      errors: [],
+      loading: false,
+    };
+  }
 
   handleLogin() {
     const {navigation} = this.props;
@@ -177,6 +182,12 @@ export default class preSignUp extends Component {
                 </Text>
               </LinearGradient>
             </TouchableOpacity>
+            <TouchableOpacity onPress={() => navigation.navigate('Welcome')}>
+              <Text gray h4 center style={{textDecorationLine: 'underline'}}>
+                Back
+              </Text>
+            </TouchableOpacity>
+            <View style={{marginTop: '3%'}} />
           </View>
         </KeyboardAvoidingView>
       </Block>

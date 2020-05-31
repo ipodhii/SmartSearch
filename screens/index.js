@@ -8,6 +8,8 @@ import SignUp from './SignUp';
 import preSignUp from './preSignUp';
 import Advice from './Advice';
 import EmailList from './emailList';
+import Forgot from './Forgot';
+import Chat from './Chat';
 
 module.exports = {
   Browse,
@@ -20,4 +22,6 @@ module.exports = {
   preSignUp,
   Advice,
   EmailList,
+  Forgot,
+  Chat,
 };

@@ -97,7 +97,7 @@ export default class Advice extends Component {
     let url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${placeName}&key=${API_KEY}`;
     return fetch(url).then(convertToJson);
   };
-  toggleModal(modalVisible) {
+  toggleModal(modalVisible){
     this.setState({modalVisible});
   }
 
@@ -435,7 +435,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     textAlign: 'center',
     justifyContent: 'center',
-    backgroundColor: '#2BDA8E',
+    backgroundColor: '#51B72B',
   },
   Cancelbutton: {
     borderRadius: 65 * scale,

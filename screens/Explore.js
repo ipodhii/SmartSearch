@@ -1,195 +1,192 @@
 //myproject explore backup
-import React, { Component } from 'react'
-import { Animated, Dimensions, Image, StyleSheet, ScrollView, TouchableOpacity,View,
-  TextInput } from 'react-native'
+import React, {Component} from 'react';
+import {
+  Animated,
+  Dimensions,
+  Image,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  View,
+  TextInput,
+} from 'react-native';
 import Icon from 'react-native-vector-icons';
 
-import { Button, Input, Block, Text } from '../components';
-import { theme, mocks } from '../constants';
+import {Button, Divider, Input, Block, Text} from '../components';
 
-const { width, height } = Dimensions.get('window');
+import {theme, mocks} from '../constants';
+
+const {width, height} = Dimensions.get('window');
 const scale = Dimensions.get('window').width / 750;
-const API_KEY='AIzaSyBec195_3M-GvCsL83hXSwQpaDmQruO3HU'
+const API_KEY = 'AIzaSyBec195_3M-GvCsL83hXSwQpaDmQruO3HU';
+const SIZE = 400;
+import Carousel from 'react-native-snap-carousel';
+import {sliderWidth, itemWidth} from '../utils/SliderEntry';
+import MapView, {Marker, Callout, Circle} from 'react-native-maps';
+
+const ENTRIES1 = [
+  {
+    title: 'Beautiful and dramatic Antelope Canyon',
+    subtitle: 'Lorem ipsum dolor sit amet et nuncat mergitur',
+    illustration: 'https://i.imgur.com/UYiroysl.jpg',
+  },
+  {
+    title: 'Earlier this morning, NYC',
+    subtitle: 'Lorem ipsum dolor sit amet',
+    illustration: 'https://i.imgur.com/UPrs1EWl.jpg',
+  },
+  {
+    title: 'White Pocket Sunset',
+    subtitle: 'Lorem ipsum dolor sit amet et nuncat ',
+    illustration: 'https://i.imgur.com/MABUbpDl.jpg',
+  },
+  {
+    title: 'Acrocorinth, Greece',
+    subtitle: 'Lorem ipsum dolor sit amet et nuncat mergitur',
+    illustration: 'https://i.imgur.com/KZsmUi2l.jpg',
+  },
+  {
+    title: 'The lone tree, majestic landscape of New Zealand',
+    subtitle: 'Lorem ipsum dolor sit amet',
+    illustration: 'https://i.imgur.com/2nCt3Sbl.jpg',
+  },
+  {
+    title: 'Middle Earth, Germany',
+    subtitle: 'Lorem ipsum dolor sit amet',
+    illustration: 'https://i.imgur.com/lceHsT6l.jpg',
+  },
+];
+
+function convertToJson(res) {
+  if (!res) return res;
+  return res.json();
+}
 class Explore extends Component {
-  constructor(props){
+  constructor(props) {
     super(props);
-    this.state = { 
-      searchFocus: new Animated.Value(0.6),
-      searchString: null,
-      loading: false,
-      data: [],
-      pageToken: '',
-      refreshing: false,
-      siteTitle: ''
- 
-      
-    }
+    this.state = {
+      siteTitle: '',
+      place: '',
+      img: '',
+    };
   }
 
-  componentDidMount() {
+  async fetchData() {
+    let {place} = this.state;
+    let url = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=${SIZE}&photoreference=${place.photos[0].photo_reference}&sensor=false&key=${API_KEY}`;
+    console.log('fetchData');
 
+    await fetch(url)
+      .then(async res => {
+        console.log('rrreeeessssssss', res);
+        //      let img = await convertToJson(res);
+        this.setState({img: res.url});
+      })
+      .catch(e => {
+        console.log('printerrrrexplore', e);
+      });
+  }
+  componentDidMount() {
+    console.log('componentDidMount');
     this.fetchData();
   }
 
-  fetchData = () => {
-
-    navigator.geolocation.getCurrentPosition(
-            (position) => {
-  //  const latitude = Number(position.coords.latitude.toFixed(6));
- //   const longitude = Number(position.coords.longitude.toFixed(6));
-    const { pageToken } = this.state;
-
-    //https://maps.googleapis.com/maps/api/place/textsearch/json?query=starbucks+seattle&sensor=false&key=YOUR_API_KEY
-   // https://maps.googleapis.com/maps/api/place/textsearch/json?query=restaurants+israel+canada&key=YOURAPIKEY
-    const urlFirst = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=restaurants+israel+canada&key=${API_KEY}`;
-    const urlNext = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=restaurants+israel+canada&key=${API_KEY}`;
-    
-    let url = pageToken === '' ? urlFirst : urlNext
-    console.log(url);
-    console.log("url");
-    this.setState({ loading: true });
-    fetch(url)
-      .then(res => {
-        return res.json()
-      })
-      .then(res => {
-
-        const arrayData = _.uniqBy( [...this.state.data, ...res.results] , 'id' )
-
-        this.setState({
-    //      siteTitle: "Resturants Near By",
-          data: arrayData,
-          loading: false,
-       //   refreshing: false,
-       //   pageToken: res.next_page_token
-        });
-
-      })
-      .catch(error => {
-        console.log(error);
-        this.setState({ loading: false });
-      });
-    })
-  };
-updateSearch = search => {
-  this.setState({ search });
-};
-
-  handleSearchFocus(status) {
-    Animated.timing(
-      this.state.searchFocus,
-      {
-        toValue: status ? 0.8 : 0.6, // status === true, increase flex size
-        duration: 150, // ms
-      }
-    ).start();
-  }
-
-  renderSearch() {
-    const { searchString, searchFocus } = this.state;
-    const isEditing = searchFocus && searchString;
-
-    return (
-      <View style={{paddingLeft:60*scale,paddingRight:60*scale}}>
-           <View style={styles.singleField}>
-             <View style={{marginTop:20*scale,lineHight:10}}>
-             <Image style={styles.iconBlk}
-                source={require('../assets/images/password_icon.png')} />
-             </View>
-              <TextInput style={styles.textFiled}
-                placeholder="Search"
-                returnKeyType="go"
-                underlineColorAndroid={'transparent'}
-                placeholderTextColor="rgba(0,0,0,1)"
-                secureTextEntry
-                value={this.state.password2}
-                onChangeText={(password2) => this.setState({ password2 })}
-                ref={(input) => this.passwordInput = input}
-              />
-            </View>
-      </View>
-  )
-  }
-
-  renderImage(img, index) {
-    const { navigation } = this.props;
-    const sizes = Image.resolveAssetSource(img);
-    const fullWidth = width - (theme.sizes.padding * 2.5);
-    const resize = (sizes.width * 100) / fullWidth;
-    const imgWidth = resize > 75 ? fullWidth : sizes.width * 1;
-
-    return (
-      <TouchableOpacity
-        key={`img-${index}`}
-        onPress={() => navigation.navigate('Product')}
-      >
-        <Image
-          source={img}
-          style={[
-            styles.image,
-            { minWidth: imgWidth, maxWidth: imgWidth }
-          ]}
-        />
-      </TouchableOpacity>
-    )
-  }
-
-  renderExplore() {
-    const { images, navigation } = this.props;
-    const mainImage = images[0];
-
-    return (
-      <Block style={{ marginBottom: height / 3 }}>
-        <TouchableOpacity
-          style={[ styles.image, styles.mainImage ]}
-          onPress={() => navigation.navigate('Product')}
-        >
-          <Image source={mainImage} style={[styles.image, styles.mainImage]} />
-        </TouchableOpacity>
-        <Block row space="between" wrap>
-          {
-            images.slice(1).map((img, index) => this.renderImage(img, index))
-          }
-        </Block>
-      </Block>
-    )
-  }
-
-  renderFooter() {
-    return (
-      <View
-        locations={[0.5, 1]}
-        style={styles.footer}
-        colors={['rgba(255,255,255,0)', 'rgba(255,255,255,0.6)']}
-      >
-        <Button style={{ width: width / 2.678 }}>
-          <Text bold white center>Filter</Text>
-        </Button>
-      </View>
-    )
+  componentWillMount() {
+    let {navigation} = this.props;
+    let place = navigation.getParam('place');
+    console.log('99printplaaaaccceeee', place);
+    this.setState({place}, () => this.fetchData());
   }
 
   render() {
-    console.log("printState",this.state.data)
+    let {place} = this.state;
+    console.log('printState', place.icon);
+
     return (
-      <Block>
-        <Block flex={false} row center space="between" style={styles.header}>
-         <View style={{marginTop:20*scale}}>
-         <Text h1 bold>Explore</Text>
-           </View>
-          
-          
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <Block style={styles.product}>
+          <Text h2 bold>
+            {place.name}
+          </Text>
+          <Block
+            flex={false}
+            style={{display: 'flex', width: 100}}
+            row
+            margin={[theme.sizes.base, 0]}>
+            {place && place.types
+              ? place.types.map(tag => (
+                  <Text
+                    style={{display: 'flex'}}
+                    key={`tag-${tag}`}
+                    caption
+                    gray
+                    style={styles.tag}>
+                    {tag}
+                  </Text>
+                ))
+              : null}
+          </Block>
+          <Text gray light height={22}>
+            {place.description}
+          </Text>
+
+          <Block>
+            <Text semibold>Gallery</Text>
+            <Block row margin={[theme.sizes.padding * 0.9, 0]}>
+              {console.log('printplacephotops', place.photos)}
+              <Divider margin={[theme.sizes.padding * 0.9, 0]} />
+
+              {place.photos ? (
+                <Image
+                  source={{
+                    width: 350,
+                    height: 350,
+                    uri: this.state.img,
+                  }}
+                />
+              ) : (
+                <Text>No images</Text>
+              )}
+            </Block>
+
+            <Text semibold>Map</Text>
+            <Block row margin={[theme.sizes.padding * 0.9, 0]}>
+              {console.log('printlocation', place.location)}
+              {place.geometry ? (
+                <MapView
+                  style={styles.map}
+                  initialRegion={{
+                    latitude: place.geometry.location.lat,
+                    longitude: place.geometry.location.lng,
+                    latitudeDelta: 0.0922,
+                    longitudeDelta: 0.0421,
+                  }}>
+                  <Circle
+                    center={{
+                      latitude: place.geometry.location.lat,
+                      longitude: place.geometry.location.lng,
+                    }}
+                    fillColor={'rgba(200,300,200,0.5)'}
+                    radius={1000}
+                  />
+                  <Marker
+                    coordinate={{
+                      latitude: place.geometry.location.lat,
+                      longitude: place.geometry.location.lng,
+                    }}>
+                    <Callout>
+                      <Text>{place.name}</Text>
+                    </Callout>
+                  </Marker>
+                </MapView>
+              ) : null}
+              {console.log('printplacephotops', place.photos)}
+              <Divider margin={[theme.sizes.padding * 0.9, 0]} />
+            </Block>
+          </Block>
         </Block>
-        {this.renderSearch()}
-
-
-        <ScrollView showsVerticalScrollIndicator={false} style={styles.explore}>
-          {/*this.renderExplore()*/}
-        </ScrollView>
-
-        {this.renderFooter()}
-      </Block>
-    )
+      </ScrollView>
+    );
   }
 }
 
@@ -202,16 +199,16 @@ export default Explore;
 const styles = StyleSheet.create({
   singleField: {
     flexDirection: 'row',
-  //  justifyContent: 'center',
-   // alignItems: 'center',
+    //  justifyContent: 'center',
+    // alignItems: 'center',
     alignSelf: 'stretch',
     marginBottom: 15,
     borderColor: '#e7edef',
     borderBottomWidth: 1,
-},
+  },
   header: {
     paddingHorizontal: theme.sizes.base * 2,
-    paddingBottom: theme.sizes.base * 2
+    paddingBottom: theme.sizes.base * 2,
   },
   search: {
     height: theme.sizes.base * 2,
@@ -228,7 +225,7 @@ const styles = StyleSheet.create({
   searchRight: {
     top: 0,
     marginVertical: 0,
-    backgroundColor: 'transparent'
+    backgroundColor: 'transparent',
   },
   searchIcon: {
     position: 'absolute',
@@ -238,16 +235,13 @@ const styles = StyleSheet.create({
   explore: {
     marginHorizontal: theme.sizes.padding * 1.25,
   },
-  image: {
-    minHeight: 100,
-    maxHeight: 130,
-    maxWidth: width - (theme.sizes.padding * 2.5),
-    marginBottom: theme.sizes.base,
-    borderRadius: 4,
+  map: {
+    width: 350,
+    height: 350,
   },
   mainImage: {
-    minWidth: width - (theme.sizes.padding * 2.5),
-    minHeight: width - (theme.sizes.padding * 2.5),
+    minWidth: width - theme.sizes.padding * 2.5,
+    minHeight: width - theme.sizes.padding * 2.5,
   },
   footer: {
     position: 'absolute',
@@ -260,5 +254,27 @@ const styles = StyleSheet.create({
     height: height * 0.1,
     width,
     paddingBottom: theme.sizes.base * 4,
-  }
-})
+  },
+
+  product: {
+    paddingHorizontal: theme.sizes.base * 2,
+    paddingVertical: theme.sizes.padding,
+  },
+  tag: {
+    borderColor: theme.colors.gray2,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: theme.sizes.base,
+    paddingHorizontal: theme.sizes.base,
+    paddingVertical: theme.sizes.base / 2.5,
+    marginRight: theme.sizes.base * 0.625,
+  },
+  image: {
+    width: width / 3.26,
+    height: width / 3.26,
+    marginRight: theme.sizes.base,
+  },
+  more: {
+    width: 55,
+    height: 55,
+  },
+});

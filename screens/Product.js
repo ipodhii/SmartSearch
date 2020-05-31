@@ -1,25 +1,32 @@
-import React, { Component } from 'react';
-import { Dimensions, Image, FlatList, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import React, {Component} from 'react';
+import {
+  Dimensions,
+  Image,
+  FlatList,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+} from 'react-native';
 import Icon from 'react-native-vector-icons';
 
-import { Button, Divider, Input, Block, Text } from '../components';
-import { theme, mocks } from '../constants';
+import {Button, Divider, Input, Block, Text} from '../components';
+import {theme, mocks} from '../constants';
 
-const { width, height } = Dimensions.get('window');
+const {width, height} = Dimensions.get('window');
 
 class Product extends Component {
   static navigationOptions = ({navigation}) => {
     return {
       headerRight: (
         <Button onPress={() => {}}>
-          <Icon.Entypo name="dots-three-horizontal" color={theme.colors.gray} />
+          <Icon name="dots-three-horizontal" color={theme.colors.gray} />
         </Button>
-      )
-    }
-  }
+      ),
+    };
+  };
 
   renderGallery() {
-    const { product } = this.props;
+    const {product} = this.props;
     return (
       <FlatList
         horizontal
@@ -33,7 +40,7 @@ class Product extends Component {
           <Image
             source={item}
             resizeMode="contain"
-            style={{ width, height: height / 2.8 }}
+            style={{width, height: height / 2.8}}
           />
         )}
       />
@@ -41,14 +48,16 @@ class Product extends Component {
   }
 
   render() {
-    const { product } = this.props;
+    const {product} = this.props;
 
     return (
       <ScrollView showsVerticalScrollIndicator={false}>
         {this.renderGallery()}
 
         <Block style={styles.product}>
-          <Text h2 bold>{product.name}</Text>
+          <Text h2 bold>
+            {product.name}
+          </Text>
           <Block flex={false} row margin={[theme.sizes.base, 0]}>
             {product.tags.map(tag => (
               <Text key={`tag-${tag}`} caption gray style={styles.tag}>
@@ -56,43 +65,27 @@ class Product extends Component {
               </Text>
             ))}
           </Block>
-          <Text gray light height={22}>{product.description}</Text>
-          
+          <Text gray light height={22}>
+            {product.description}
+          </Text>
+
           <Divider margin={[theme.sizes.padding * 0.9, 0]} />
-          
+
           <Block>
             <Text semibold>Gallery</Text>
             <Block row margin={[theme.sizes.padding * 0.9, 0]}>
-              {product.images.slice(1, 3).map(
-                (image, index) => (
-                  <Image
-                    key={`gallery-${index}`}
-                    source={image}
-                    style={styles.image}
-                  />
-                )
-              )}
-              <Block
-                flex={false}
-                card
-                center
-                middle
-                color="rgba(197,204,214,0.20)"
-                style={styles.more}
-              >
-                <Text gray>+{product.images.slice(3).length}</Text>
-              </Block>
+             
             </Block>
           </Block>
         </Block>
       </ScrollView>
-    )
+    );
   }
 }
 
 Product.defaultProps = {
   product: mocks.products[0],
-}
+};
 
 export default Product;
 
@@ -117,5 +110,5 @@ const styles = StyleSheet.create({
   more: {
     width: 55,
     height: 55,
-  }
-})
+  },
+});
