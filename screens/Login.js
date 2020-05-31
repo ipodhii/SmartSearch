@@ -54,146 +54,159 @@ export default class Login extends Component {
 
     return (
       <Block>
-        <KeyboardAvoidingView style={styles.login}>
-          <Block flex={false} row center space="between" style={styles.header}>
-            <Text h1 bold>
-              Login
-            </Text>
-          </Block>
+        <Block>
+          <KeyboardAvoidingView style={styles.login}>
+            <Block
+              flex={false}
+              row
+              center
+              space="between"
+              style={styles.header}>
+              <Text h1 bold>
+                Login
+              </Text>
+            </Block>
 
-          <View
-            style={{
-              paddingLeft: 70 * scale,
-              paddingRight: 70 * scale,
-              paddingTop: 70 * scale,
-            }}>
-            <View style={styles.singleField}>
-              <Image
-                style={styles.iconBlk}
-                source={require('../assets/images/email_icon.png')}
-              />
-              <TextInput
-                style={styles.textFiled}
-                placeholder="Email"
-                keyboardType="email-address"
-                underlineColorAndroid={'transparent'}
-                autoCapitalize="none"
-                autoCorrect={false}
-                placeholderTextColor="rgba(0,0,0,1)"
-                value={email}
-                onChangeText={email => this.setState({email})}
-              />
-            </View>
-            <View style={styles.singleField}>
-              <Image
-                style={styles.iconBlk}
-                source={require('../assets/images/password_icon.png')}
-              />
-              <TextInput
-                style={styles.textFiled}
-                placeholder="Password"
-                underlineColorAndroid={'transparent'}
-                placeholderTextColor="rgba(0,0,0,1)"
-                secureTextEntry
-                value={password}
-                onChangeText={password => this.setState({password})}
-              />
-            </View>
-            <View style={styles.singleField}>
-              <Image
-                style={styles.iconBlk}
-                source={require('../assets/images/password_icon.png')}
-              />
-              <TextInput
-                style={styles.textFiled}
-                placeholder="Confirm Password"
-                returnKeyType="go"
-                underlineColorAndroid={'transparent'}
-                placeholderTextColor="rgba(0,0,0,1)"
-                secureTextEntry
-                value={confirmPassword}
-                onChangeText={confirmPassword =>
-                  this.setState({confirmPassword})
-                }
-                //ref={(input) => this.passwordInput = input}
-              />
-            </View>
-            {errorMsg && (
-              <View>
-                <Text
-                  style={{color: 'rgba(200, 0, 0, 0.8)', textAlign: 'center'}}>
-                  Email or password are incorrect.
-                </Text>
-              </View>
-            )}
-            <View style={{marginTop: 60 * scale}} />
-            <TouchableOpacity
-              onPress={async () => {
-                let body = JSON.stringify({
-                  email,
-                  password,
-                  confirmPassword,
-                });
-                console.log('pressed', body);
-
-                try {
-                  const res = await fetch(`${url}api/login`, {
-                    method: 'POST',
-                    headers: {
-                      Accept: 'application/json',
-                      'Content-Type': 'application/json',
-                    },
-                    body,
-                  });
-                  const tmp = await convertToJson(res);
-
-                  console.log('restmmmppppp', tmp);
-                  this.setState({errorMsg: false}, () =>
-                    navigation.navigate('Browse', {user: tmp}),
-                  );
-                } catch (e) {
-                  console.log('printeeee', e);
-                  this.setState({errorMsg: true});
-                }
+            <View
+              style={{
+                paddingLeft: 70 * scale,
+                paddingRight: 70 * scale,
+                paddingTop: 70 * scale,
               }}>
-              <LinearGradient
-                start={{x: 4, y: 2}}
-                end={{x: 0, y: 0}}
-                colors={['#FFFFFF', '#EFEFEF']}
-                opacity={0.8}
-                style={styles.linearGradient}>
+              <View style={styles.singleField}>
+                <Image
+                  style={styles.iconBlk}
+                  source={require('../assets/images/email_icon.png')}
+                />
+                <TextInput
+                  style={styles.textFiled}
+                  placeholder="Email"
+                  keyboardType="email-address"
+                  underlineColorAndroid={'transparent'}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  placeholderTextColor="rgba(0,0,0,1)"
+                  value={email}
+                  onChangeText={email => this.setState({email})}
+                />
+              </View>
+              <View style={styles.singleField}>
+                <Image
+                  style={styles.iconBlk}
+                  source={require('../assets/images/password_icon.png')}
+                />
+                <TextInput
+                  style={styles.textFiled}
+                  placeholder="Password"
+                  underlineColorAndroid={'transparent'}
+                  placeholderTextColor="rgba(0,0,0,1)"
+                  secureTextEntry
+                  value={password}
+                  onChangeText={password => this.setState({password})}
+                />
+              </View>
+              <View style={styles.singleField}>
+                <Image
+                  style={styles.iconBlk}
+                  source={require('../assets/images/password_icon.png')}
+                />
+                <TextInput
+                  style={styles.textFiled}
+                  placeholder="Confirm Password"
+                  returnKeyType="go"
+                  underlineColorAndroid={'transparent'}
+                  placeholderTextColor="rgba(0,0,0,1)"
+                  secureTextEntry
+                  value={confirmPassword}
+                  onChangeText={confirmPassword =>
+                    this.setState({confirmPassword})
+                  }
+                  //ref={(input) => this.passwordInput = input}
+                />
+              </View>
+              {errorMsg && (
+                <View>
+                  <Text
+                    style={{
+                      color: 'rgba(200, 0, 0, 0.8)',
+                      textAlign: 'center',
+                    }}>
+                    Email or password are incorrect.
+                  </Text>
+                </View>
+              )}
+            </View>
+            
+          </KeyboardAvoidingView>
+        </Block>
+        <Block middle flex={0.5} margin={[0, theme.sizes.padding * 2]}>
+          <TouchableOpacity
+            onPress={async () => {
+              let body = JSON.stringify({
+                email,
+                password,
+                confirmPassword,
+              });
+              console.log('pressed', body);
+
+              try {
+                const res = await fetch(`${url}api/login`, {
+                  method: 'POST',
+                  headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                  },
+                  body,
+                });
+                const tmp = await convertToJson(res);
+
+                console.log('restmmmppppp', tmp);
+                this.setState({errorMsg: false}, () =>
+                  navigation.navigate('Browse', {user: tmp}),
+                );
+              } catch (e) {
+                console.log('printeeee', e);
+                this.setState({errorMsg: true});
+              }
+            }}>
+            <LinearGradient
+              start={{x: 4, y: 2}}
+              end={{x: 0, y: 0}}
+              colors={['#FFFFFF', '#EFEFEF']}
+              opacity={0.8}
+              style={styles.linearGradient}>
+              <View style={{width: '80%'}}>
                 <Text
                   h3
-                  gray2
+                  secondary
                   style={[
                     styles.buttonText,
                     {marginTop: theme.sizes.padding / 2},
                   ]}>
                   Login
                 </Text>
-              </LinearGradient>
-            </TouchableOpacity>
-
-            <TouchableOpacity onPress={() => navigation.navigate('Forgot')}>
-              <LinearGradient
-                start={{x: 4, y: 2}}
-                end={{x: 0, y: 0}}
-                colors={['#FFFFFF', '#EFEFEF']}
-                opacity={0.8}
-                style={styles.linearGradient}>
-                <Text
-                  h3
-                  gray2
-                  style={[
-                    styles.buttonText,
-                    {marginTop: theme.sizes.padding / 2},
-                  ]}>
-                  Forgot your password?
-                </Text>
-              </LinearGradient>
-            </TouchableOpacity>
-          </View>
-        </KeyboardAvoidingView>
+              </View>
+            </LinearGradient>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate('Forgot')}>
+            <LinearGradient
+              start={{x: 4, y: 2}}
+              end={{x: 0, y: 0}}
+              colors={['#FFFFFF', '#EFEFEF']}
+              opacity={0.8}
+              style={styles.linearGradient}>
+              <Text
+                h3
+                secondary
+                style={[
+                  styles.buttonTextForgotStyle,
+                  {marginTop: theme.sizes.padding / 2},
+                ]}>
+                Forgot your password?
+              </Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        </Block>
       </Block>
     );
   }
@@ -270,7 +283,17 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: 'Gill Sans',
     textAlign: 'center',
-    margin: 10,
+    marginLeft: '20%',
+    marginBottom: '5%',
+    //   color: '#ffffff',
+    backgroundColor: 'transparent',
+  },
+  buttonTextForgotStyle: {
+    fontSize: 18,
+    fontFamily: 'Gill Sans',
+    textAlign: 'center',
+    marginLeft: '10%',
+    marginBottom: '5%',
     //   color: '#ffffff',
     backgroundColor: 'transparent',
   },

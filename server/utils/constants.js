@@ -25,5 +25,8 @@ module.exports = Object.freeze({
   TOKEN_SECRET: 'amitSecretKey',
   DB_CONNECT:
     'mongodb+srv://ipodhii:Israel1234!!@cluster0-sdcnk.mongodb.net/test?retryWrites=true&w=majority',
-  PORT: '5000',
+  PORT: '8080',
+  TITLE_MAIL: 'SmartSearch app',
+  FROM_MAIL: 'ipodhii@gmail.com',
+  SUBJECT_MAIL: 'Service account in SmartSearch‏',
 });

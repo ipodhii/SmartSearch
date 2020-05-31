@@ -21,7 +21,7 @@ const Advice = mongoose.model(
       validate: {
         validator: function(phone) {
           phone = phone.replace('-', '');
-          logger.log('debug', phone);
+          logger.log('info', phone);
           return phone.length === constants.PHONE_SIZE;
         },
         message: 'Invalid phone size.',

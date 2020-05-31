@@ -18,7 +18,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import {Block, Text} from '../components';
 import {theme} from '../constants';
 import Images from '../assets/Themes/Images';
-
+import url from '../config/config';
 let jsgraphs = require('js-graph-algorithms');
 const VALID_EMAIL = 'contact@react-ui-kit.com';
 const VALID_PASSWORD = 'subscribe';
@@ -278,8 +278,7 @@ export default class Advice extends Component {
                 });
                 this.getToken();
 
-                fetch('http://192.168.43.211:5000/api/advice', {
-                  // fetch('http://10.0.0.2:5000/api/advice', {
+                fetch(`${url}api/advice`, {
                   method: 'POST',
                   headers: {
                     Accept: 'application/json',

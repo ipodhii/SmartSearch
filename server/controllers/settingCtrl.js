@@ -6,7 +6,7 @@ const _ = require('lodash');
 
 class SettingCtrl {
   async updateSetting(req, res) {
-    logger.log('info', '/api/setting');
+    logger.log('info', 'post /api/setting');
     const error = settingValidation(req.body);
     if (error) {
       logger.log('error', error.details[0].message);
@@ -23,6 +23,13 @@ class SettingCtrl {
     );
     setting = new SettingView(setting);
     return res.send(constants.HTTP_STATUS.OK).send();
+  }
+  async getSetting(req,res){
+    logger.log('info', 'get /api/setting');
+    let settings=await Setting.findOne({user: req.body.user});
+    if(!settings){
+      
+    }
   }
 }
 

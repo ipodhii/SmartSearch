@@ -11,12 +11,17 @@ const settingSchema = new Schema({
     required: true,
     type: String,
   },
+  notifiyMembers: {
+    required: true,
+    type: String,
+  },
 });
-const Setting = mongoose.model('Setting', settingSchema);
+const Setting = mongoose.model('settings', settingSchema);
 function settingValidation(settings) {
   const schema = {
     notification: Joi.string().required(),
     user: Joi.string().required(),
+    notifiyMembers: Joi.string().required(),
   };
   return Joi.validate(settings, schema);
 }

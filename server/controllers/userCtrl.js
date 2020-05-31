@@ -8,7 +8,19 @@ const logger = require('../config/logger');
 const _ = require('lodash');
 const UserView = require('../views/UserView');
 const AdviceView = require('../views/AdviceView');
+const UserQuery = require('../utils/UserQuery');
 
+function buildUserQuery({type, city, country, rating}) {
+  let userQuery = new UserQuery();
+  let querys = userQuery
+    .setType(type)
+    .setCity(city)
+    .setCountry(country)
+    .setRating(rating)
+    .build();
+  let keys = Object.keys(querys);
+  return keys ? [querys] : [];
+}
 class UserCtrl {
   async addUser(req, res) {
     logger.log('info', '/api/register');
@@ -100,41 +112,85 @@ class UserCtrl {
       }
     });
   }
+  async setPasswordMail(req, res) {
+    let transport = nodemailer.createTransport(constants.SMTP);
+    let email = req.body.email;
+    //find user by mail
+    let user = await User.findOne({email});
+    console.log('printUser', user);
+    if (!user) {
+      return res
+        .status(constants.HTTP_STATUS.ERROR)
+        .send('Email doesnt exist.');
+    }
+    //generate new password, hash it and update user object
+    let newPassword = '123456789';
+    const salt = await bcrypt.genSalt(constants.SALT_ROUNDS);
+    const hashPassword = await bcrypt.hash(newPassword, salt);
+    const hashConfirmPassword = await bcrypt.hash(newPassword, salt);
+    user.password = hashPassword;
+    user.confirmPassword = hashConfirmPassword;
+    console.log('printnewuser', user);
+    //save changes and send mail to user
+
+    try {
+      user = await user.save();
+      let message = {
+        from: constants.FROM_MAIL, // Sender address
+        to: email, // List of recipients
+        subject: constants.SUBJECT_MAIL, // Subject line
+        text: `Hi ${email}, your password was reset, the new password is: ${newPassword}. Please, change it for you convenience.`,
+      };
+      transport.sendMail(message, function(err, info) {
+        if (err) {
+          console.log('errmail', err);
+          res.status(constants.HTTP_STATUS.ERROR).send();
+        } else {
+          console.log('finished successfuly');
+          res.status(constants.HTTP_STATUS.OK).send();
+        }
+      });
+    } catch (err) {
+      console.log('error total', user);
+      return res.status(constants.HTTP_STATUS.ERROR).send(err);
+    }
+  }
+
   async getAdvicesFromContacts(req, res) {
-    logger.log('info', '/api/advice');
-    let {type, city, country, rating} = req.body;
+    logger.log('info', '/api/useradvices');
     let allPromises = [];
     let user = await User.findOne({email: req.body.email});
+    if (!user) {
+      return res.send(constants.HTTP_STATUS.BAD_REQUEST);
+    }
     let userContactsMember = JSON.parse(user.userContactsMember);
+    let querys = buildUserQuery(req.body);
+    console.log('hehhehehee2', querys);
 
     userContactsMember.map(member => {
       console.log('peintmmm', member);
       return allPromises.push(
         new Promise(function(resolve, reject) {
-          resolve(
-            Advice.find({phone: member.phone}).or([
-              {type},
-              {city},
-              {country},
-              {rating},
-            ]),
-          );
+          resolve(Advice.find({phone: member.phone}).or(querys));
         }),
       );
     });
 
     try {
       return await Promise.all(allPromises).then(advices => {
-        console.log('printcheck', advices);
         let advicesView = [];
-        for (let advice of advices) {
-          if (advice != {}) {
-            advicesView.push(new AdviceView(advice));
+        for (let advicesPerPerson of advices) {
+          for (let advice of advicesPerPerson) {
+            if (advice != {}) {
+              advicesView.push(new AdviceView(advice));
+            }
           }
         }
+        console.log('resssss', advicesView);
         return res.status(constants.HTTP_STATUS.OK).send(advicesView);
       });
     } catch (e) {
+      console.log('printerrrr', e);
       return res.send(constants.HTTP_STATUS.BAD_REQUEST);
     }
   }
