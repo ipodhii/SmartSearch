@@ -30,6 +30,7 @@ router.post('/api/login', userCtrl.login);
 router.post('/api/useradvices', userCtrl.getAdvicesFromContacts);
 router.post('/api/sendMail', userCtrl.sendMail);
 router.post('/api/setPasswordMail', userCtrl.setPasswordMail);
+router.put('/api/user', userCtrl.updateUser);
 
 router.get('/api/messages', socketsCtrl.getAllMessages);
 router.post('/api/sendMessage', socketsCtrl.sendMessage);
