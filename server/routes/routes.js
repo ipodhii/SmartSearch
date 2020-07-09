@@ -4,6 +4,7 @@ const UserCtrl = require('../controllers/userCtrl');
 const AdviceCtrl = require('../controllers/adviceCtrl');
 const SettingCtrl = require('../controllers/settingCtrl');
 const SocketsCtrl = require('../controllers/socketsCtrl');
+const NotesCtrl = require('../controllers/notesCtrl');
 
 const auth = require('../middleware/auth');
 const logger = require('../config/logger');
@@ -15,6 +16,7 @@ const userCtrl = new UserCtrl();
 const adviceCtrl = new AdviceCtrl();
 const settingCtrl = new SettingCtrl();
 const socketsCtrl = new SocketsCtrl();
+const notesCtrl = new NotesCtrl();
 
 //routes
 router.get('/', (req, res) => {
@@ -38,5 +40,11 @@ router.post('/api/advice', adviceCtrl.addAdvice);
 router.post('/api/setting', settingCtrl.createSetting);
 router.put('/api/setting', settingCtrl.updateSetting);
 router.get('/api/setting', settingCtrl.getSetting);
+
+//note routes
+router.post('/api/note', notesCtrl.createNote);
+router.put('/api/note', notesCtrl.updateNote);
+router.get('/api/note', notesCtrl.getNotes);
+router.delete('/api/note', notesCtrl.deleteNote);
 
 module.exports = router;
