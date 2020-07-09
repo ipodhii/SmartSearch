@@ -34,7 +34,9 @@ router.post('/api/sendMessage', socketsCtrl.sendMessage);
 
 router.post('/api/advice', adviceCtrl.addAdvice);
 
-router.post('/api/setting', settingCtrl.updateSetting);
+//setting routes
+router.post('/api/setting', settingCtrl.createSetting);
+router.put('/api/setting', settingCtrl.updateSetting);
 router.get('/api/setting', settingCtrl.getSetting);
 
 module.exports = router;

@@ -8,6 +8,9 @@ const constants = require('./utils/constants');
 const socketsCtrl = require('./controllers/socketsCtrl');
 const MessageView = require('./views/MessageView');
 
+const FireBaseCtrl = require('./controllers/fireBaseCtrl');
+const fireBaseCtrl = new FireBaseCtrl();
+
 const PORT = process.env.PORT || constants.PORT;
 //middlewares
 app.use(express.json());

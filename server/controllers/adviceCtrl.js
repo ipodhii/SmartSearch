@@ -1,9 +1,9 @@
 const {Advice, adviceValidation} = require('../model/Advice');
-const jwt = require('jsonwebtoken');
 const constants = require('../utils/constants');
 const logger = require('../config/logger');
 const _ = require('lodash');
-
+const FireBaseCtrl = require('../controllers/fireBaseCtrl');
+const fireBaseCtrl = new FireBaseCtrl();
 
 class AdviceCtrl {
   async addAdvice(req, res) {
@@ -22,6 +22,7 @@ class AdviceCtrl {
         'city',
         'country',
         'email',
+        'placeId',
         'placeName',
         'description',
         'rating',
@@ -31,14 +32,14 @@ class AdviceCtrl {
 
     try {
       advice = await advice.save();
+      let phone = req.body.phone;
+      fireBaseCtrl.sendNotificationsToChosenContactsMembers(phone);
       return res.status(constants.HTTP_STATUS.OK).send(advice);
     } catch (err) {
       logger.log('error', err);
       return res.status(constants.HTTP_STATUS.ERROR).send(err);
     }
   }
-
-  
 }
 
 module.exports = AdviceCtrl;
