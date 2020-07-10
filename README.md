@@ -11,6 +11,7 @@ The system presents the weighted recommendations of the user's proximity that th
 
 The rest of the system users favor users so that if they make a recommendation we will receive push notification to the phone.
 
+<h2>part of the screens:</h2>
 <div><img src="assets/images/p3.png" width=160 />
 <img src="assets/images/p6.png" width=160 />
 <img src="assets/images/p5.png" width=160 />
