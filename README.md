@@ -18,6 +18,7 @@ The rest of the system users favor users so that if they make a recommendation w
 <img src="assets/images/p1.png" width=160 />
 <img src="assets/images/p2.png" width=160 />
 <img src="assets/images/p7.png" width=160 />
+  <img src="assets/images/p8.png" width=160 />
 </div>
 
 
