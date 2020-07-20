@@ -141,7 +141,7 @@ class Notes extends Component {
     }
   }
   async createNote(body) {
-    console.log('printUpdateNoteBody', body);
+    console.log('printCreateNoteBody', body);
     try {
       await fetch(`${url}api/note`, {
         method: 'POST',
@@ -326,6 +326,7 @@ class Notes extends Component {
                       isOpenCreateModal,
                       isOpenViewModal,
                       isOpenEditModal,
+                      chosenNote,
                     } = this.state;
                     if (isOpenViewModal) {
                       this.setState({
@@ -335,9 +336,21 @@ class Notes extends Component {
                         isOpenViewModal: false,
                       });
                     }
-                    let body = JSON.stringify({title, content, user: phone});
-                    if (isOpenEditModal) this.updateNote(body);
-                    if (isOpenCreateModal) this.createNote(body);
+                    let body = {
+                      title,
+                      content,
+                      user: phone,
+                    };
+                    if (isOpenEditModal) {
+                      body.id = chosenNote.id;
+                      body = JSON.stringify(body);
+                      console.log('printBodyyyy', body);
+                      this.updateNote(body);
+                    }
+                    if (isOpenCreateModal) {
+                      body = JSON.stringify(body);
+                      this.createNote(body);
+                    }
                   }}>
                   <Text style={styles.buttonText}>{'APPLY'}</Text>
                 </TouchableOpacity>
@@ -375,13 +388,13 @@ class Notes extends Component {
     console.log('checknotes222notification', notes);
     return notes.map(
       function(note, index) {
-        let {title, content, date} = note;
+        let {title, content, date, id} = note;
         let rightOptions = [
           {
             text: 'Delete',
             onPress: async () => {
-              console.log('printNodeId', note.id);
-              return this.deleteNote(note.id);
+              console.log('printNodeId', id);
+              return this.deleteNote(id);
             },
             backgroundColor: '#ff5151',
           },

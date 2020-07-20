@@ -33,7 +33,10 @@ class AdviceCtrl {
     try {
       advice = await advice.save();
       let phone = req.body.phone;
-      fireBaseCtrl.sendNotificationsToChosenContactsMembers(phone);
+      fireBaseCtrl.sendNotificationsToChosenContactsMembers(
+        phone,
+        advice.placeName,
+      );
       return res.status(constants.HTTP_STATUS.OK).send(advice);
     } catch (err) {
       logger.log('error', err);

@@ -78,13 +78,14 @@ class Notifications extends Component {
     let phone = user.phone;
     let email = user.email;
     let userCM = JSON.parse(user.userContactsMember);
+    console.log('printUrlllll', `${url}api/setting?user=${phone}`);
     try {
       let res = await fetch(`${url}api/setting?user=${phone}`, {
         method: 'GET',
       });
 
       let data = await convertToJson(res);
-      console.log('printDataFromSettings', data);
+      console.log('printDataFromSettings', data.notifiyMembers);
       let dataContactsMember = JSON.parse(data.notifiyMembers);
       let notification = JSON.parse(data.notification);
       let userContactsMember =
@@ -103,6 +104,7 @@ class Notifications extends Component {
         isExists: true,
       });
     } catch (err) {
+      console.log('errrrrrrrrrr', err);
       this.setState({
         profile: this.props.profile,
         userContactsMember: userCM,
@@ -170,9 +172,17 @@ class Notifications extends Component {
     this.setState({modalVisible});
   }
   headerBrowser() {
-    const {profile, editing, notification, phone, password, email} = this.state;
+    const {
+      profile,
+      editing,
+      notification,
+      phone,
+      password,
+      email,
+      isExists,
+    } = this.state;
     const {navigation} = this.props;
-    console.log('9999printnotification', notification);
+    console.log('9999printnotification', notification, isExists);
     return (
       <ScrollView showsVerticalScrollIndicator={false}>
         <Container>

@@ -29,4 +29,5 @@ module.exports = Object.freeze({
   TITLE_MAIL: 'SmartSearch app',
   FROM_MAIL: 'ipodhii@gmail.com',
   SUBJECT_MAIL: 'Service account in SmartSearch‏',
+  TMP_PASSWORD: '123456789',
 });

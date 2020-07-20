@@ -167,7 +167,7 @@ export default class Chat extends Component {
                 Chat room
               </TextT>
               <Divider />
-              <TextT address bold>
+              <TextT address bold style={{marginTop: -5 * scale}}>
                 {`Talk with other users.`}
               </TextT>
             </MainRecipe>

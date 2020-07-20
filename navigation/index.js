@@ -13,10 +13,13 @@ import {
   SignUp,
   preSignUp,
   Advice,
-  EmailList,
+  Notificatios,
+  Forgot,
+  Chat,
+  Menu,
+  Notes,
+  ContactList,
 } from '../screens/index';
-
-import {theme} from '../constants';
 
 const screens = createStackNavigator(
   {
@@ -29,7 +32,12 @@ const screens = createStackNavigator(
     preSignUp,
     SignUp,
     Advice,
-    EmailList,
+    Notificatios,
+    Forgot,
+    Chat,
+    Menu,
+    Notes,
+    ContactList,
   },
   {initialRouteName: 'Welcome'},
 );

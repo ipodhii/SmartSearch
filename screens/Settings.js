@@ -8,24 +8,41 @@ import {
   View,
   ActivityIndicator,
   TouchableOpacity,
+  SafeAreaView,
+  StatusBar,
+  Alert,
 } from 'react-native';
 import Slider from 'react-native-slider';
-import EmailList from './emailList';
-import {Divider, Button, Block, Text, Switch} from '../components';
+import EmailList from './Notificatios';
+import {Button, Block, Text, Switch} from '../components';
 import {theme, mocks} from '../constants';
 import Guid from 'uuid/v4';
 import Images from '../assets/Themes/Images';
+
 import url from '../config/config';
+import styled from 'styled-components';
 
 const scale = Dimensions.get('window').width / 750;
 const MAX_NOTIFICATION = 2;
+const DEFAULT_PASSWORD = 'ifyouwantchange';
 const pdu = (
   <Image
     source={Images.contactMem}
     style={{width: 55 * scale, height: 55 * scale, tintColor: 'white'}}
   />
 );
-
+const NOTIFICATION = (
+  <Image
+    source={Images.notification}
+    style={{width: 35 * scale, height: 50 * scale, tintColor: 'black'}}
+  />
+);
+const FULL_STAR = (
+  <Image
+    source={Images.fullStart}
+    style={{width: 25 * scale, height: 25 * scale, tintColor: '#FEDC26'}}
+  />
+);
 const LOADING = (
   <View style={CENTER_STYLE}>
     <ActivityIndicator size={'large'} animating={true} />
@@ -37,11 +54,16 @@ const CENTER_STYLE = {
   flexDirection: 'column',
   flex: 1,
 };
+function convertToJson(res) {
+  console.log('printRes', res);
+  if (!res) return res;
+  return res.json();
+}
 class Settings extends Component {
   state = {
     budget: 850,
     monthly: 1700,
-    notifications: true,
+    notification: false,
     newsletter: false,
     editing: null,
     profile: {},
@@ -49,16 +71,61 @@ class Settings extends Component {
     userContactsMember: [],
     phone: '',
     isPassMaxNotification: false,
-    password: 'ifyouwantchange',
+    password: DEFAULT_PASSWORD,
   };
 
-  componentDidMount() {
+  async componentDidMount() {
     const {navigation} = this.props;
     let user = navigation.getParam('user');
     console.log('printuser', user);
     let phone = user.phone;
-    let userContactsMember = JSON.parse(user.userContactsMember);
-    this.setState({profile: this.props.profile, userContactsMember, phone});
+    let email = user.email;
+    let userCM = JSON.parse(user.userContactsMember);
+    try {
+      let res = await fetch(`${url}api/setting?user=${phone}`, {
+        method: 'GET',
+      });
+
+      let data = await convertToJson(res);
+      console.log('printDataFromSettings', data);
+      let dataContactsMember = JSON.parse(data.notifiyMembers);
+      let notification = JSON.parse(data.notification);
+      let userContactsMember =
+        dataContactsMember && dataContactsMember.length
+          ? dataContactsMember
+          : userCM;
+
+      console.log('xxxxprintTest999', userContactsMember);
+      //  let test = JSON.parse(data.userContactsMember);
+      this.setState({
+        profile: this.props.profile,
+        userContactsMember,
+        notification,
+        phone,
+        email,
+        isExists: true,
+      });
+    } catch (err) {
+      this.setState({
+        profile: this.props.profile,
+        userContactsMember: userCM,
+        phone,
+        email,
+        isExists: false,
+      });
+    }
+  }
+
+  componentWillUnmount() {
+    const {navigation} = this.props;
+    let user = navigation.getParam('user');
+    let {notification, userContactsMember, isExists} = this.state;
+    let body = JSON.stringify({
+      user: user.phone,
+      notification: JSON.stringify(notification),
+      notifiyMembers: JSON.stringify(userContactsMember),
+    });
+    console.log('printBody999', body);
   }
 
   handleEdit(name, text) {
@@ -68,12 +135,62 @@ class Settings extends Component {
     this.setState({profile});
   }
 
-  toggleEdit(name) {
-    const {editing, password} = this.state;
+  async toggleEdit(name) {
+    const {editing, password, email} = this.state;
+    let body = JSON.stringify({email, newPassword: password});
+
+    console.log('checkckckc', editing, password);
     if (editing === 'location' && password && password.length > 5) {
-      this.setState({editing: !editing ? name : null});
+      fetch(`${url}api/changePassword`, {
+        method: 'PUT',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body,
+      })
+        .then(() => {
+          Alert.alert(
+            'Password changed successfully',
+            '',
+            [
+              {
+                text: 'OK',
+                onPress: () => {
+                  this.setState({editing: !editing ? name : null});
+                },
+              },
+            ],
+            {cancelable: false},
+          );
+        })
+        .catch(err => {
+          Alert.alert(
+            'Failed to changed password',
+            'password length need to be more than 5',
+            [
+              {
+                text: 'OK',
+                onPress: () => {},
+              },
+            ],
+            {cancelable: false},
+          );
+        });
     } else if (editing === 'Edit' || !editing) {
       this.setState({editing: !editing ? name : null, password: ''});
+    } else {
+      Alert.alert(
+        'Failed to changed password',
+        'Password size must be more than 5',
+        [
+          {
+            text: 'OK',
+            onPress: () => {},
+          },
+        ],
+        {cancelable: false},
+      );
     }
   }
 
@@ -94,58 +211,114 @@ class Settings extends Component {
   toggleModal(modalVisible) {
     this.setState({modalVisible});
   }
-  showMailOption() {
-    let {modalVisible} = this.state;
+  headerBrowser() {
+    const {profile, editing, notification, phone, password, email} = this.state;
+    const {navigation} = this.props;
+    console.log('9999printnotification', editing);
     return (
-      <Modal
-        animationType={'slide'}
-        visible={modalVisible}
-        onRequestClose={function() {
-          return this.toggleModal.bind(this)(false);
-        }.bind(this)}>
-        <View style={[styles.modalBack]}>
-          <View style={[styles.dialogBack]}>
-            <EmailList />
-            <View
-              style={{
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}>
-              <TouchableOpacity
-                style={styles.button}
-                onPress={() => {
-                  console.log('press confirm');
-                  this.findPlace();
-                }}>
-                <Text style={styles.buttonText}>{'APPLY'}</Text>
-              </TouchableOpacity>
-            </View>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <Container>
+          <StatusBar barStyle="light-content" />
+          <RecipeBackground source={Images.settings}>
+            <SafeAreaView>
+              <MainRecipe>
+                <TextT title heavy>
+                  Settings
+                </TextT>
+                <Divider />
+                <TextT address bold>
+                  {`View and modify your settings.`}
+                </TextT>
+              </MainRecipe>
+            </SafeAreaView>
+          </RecipeBackground>
+          <RecipesContainer style={{zIndex: 444}}>
+            <Recipes>
+              <Block style={styles.inputs}>
+                <Block
+                  row
+                  space="between"
+                  margin={[10, 0]}
+                  style={styles.inputRow}>
+                  <Block>
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                      }}>
+                      <TextT heavy style={{marginBottom: 10, color: 'black'}}>
+                        E-mail
+                      </TextT>
+                      <TextT bold style={{color: '#6F7374', marginBottom: 10}}>
+                        {email}
+                      </TextT>
+                    </View>
+                  </Block>
+                </Block>
+                <DividerRecepies />
 
-            <View
-              style={{
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}>
-              <TouchableOpacity
-                style={styles.Cancelbutton}
-                onPress={function() {
-                  this.setState({modalVisible: false, placeName: ''});
-                }.bind(this)}>
-                <Text style={styles.buttonCancelText}>{'CANCEL'}</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
+                <Block
+                  row
+                  space="between"
+                  margin={[10, 0]}
+                  style={styles.inputRow}>
+                  <Block>
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                      }}>
+                      <TextT heavy style={{marginBottom: 10, color: 'black'}}>
+                        Phone number
+                      </TextT>
+                      <TextT bold style={{color: '#6F7374', marginBottom: 10}}>
+                        {phone}
+                      </TextT>
+                    </View>
+                  </Block>
+                </Block>
+                <DividerRecepies />
+
+                <Block
+                  row
+                  space="between"
+                  margin={[10, 0]}
+                  style={styles.inputRow}>
+                  <Block>
+                    <TextT heavy style={{color: 'black', marginBottom: 10}}>
+                      Password
+                    </TextT>
+                    <TextInput
+                      style={styles.textFiled}
+                      underlineColorAndroid={'transparent'}
+                      //  placeholderTextColor="rgba(0,0,0,1)"
+                      secureTextEntry
+                      onChangeText={password => this.setState({password})}
+                      value={password}
+                    />
+                  </Block>
+                  <TextT
+                    heavy
+                    style={{color: 'black', marginBottom: 15 * scale}}
+                    onPress={() => this.toggleEdit('location')}>
+                    {editing === 'location' ? 'Save' : 'Edit'}
+                  </TextT>
+                </Block>
+              </Block>
+            </Recipes>
+          </RecipesContainer>
+        </Container>
+      </ScrollView>
     );
   }
 
   showContactsMember() {
-    let {userContactsMember} = this.state;
-    console.log('checkuserContactsMember222', userContactsMember);
+    let {userContactsMember, notification} = this.state;
+    console.log('checkuserContactsMember222notification', userContactsMember);
     return userContactsMember && userContactsMember.length > 0 ? (
       userContactsMember.map(
         function(member, index) {
+          console.log('printhhheeeerrreee', member, index);
           return (
             <View style={[styles.itemContainerV2]} key={Guid()}>
               <TouchableOpacity
@@ -183,8 +356,6 @@ class Settings extends Component {
                       <View style={styles.itemRightContainer}></View>
                     </View>
                   </View>
-
-                  <View style={[styles.sectionSeperator]} />
                 </View>
               </TouchableOpacity>
             </View>
@@ -198,102 +369,7 @@ class Settings extends Component {
     );
   }
   render() {
-    const {profile, editing, notifications, phone, password} = this.state;
-    const {navigation} = this.props;
-    console.log('printpassword', password);
-    return (
-      <Block>
-        <Block flex={false} row center space="between" style={styles.header}>
-          <View style={{marginTop: 20 * scale}}>
-            <Text h1 bold>
-              Settings
-            </Text>
-          </View>
-        </Block>
-
-        <ScrollView showsVerticalScrollIndicator={false}>
-          <Block style={styles.inputs}>
-            <Block row space="between" margin={[10, 0]} style={styles.inputRow}>
-              <Block>
-                <Text gray2 style={{marginBottom: 10}}>
-                  E-mail
-                </Text>
-                <Text bold>amitdanonmail@gmail.com</Text>
-              </Block>
-            </Block>
-
-            <Block row space="between" margin={[10, 0]} style={styles.inputRow}>
-              <Block>
-                <Text gray2 style={{marginBottom: 10}}>
-                  Phone number
-                </Text>
-                <Text bold>{phone}</Text>
-              </Block>
-            </Block>
-            <Block row space="between" margin={[10, 0]} style={styles.inputRow}>
-              <Block>
-                <Text gray2 style={{marginBottom: 10}}>
-                  Password
-                </Text>
-                <TextInput
-                  style={styles.textFiled}
-                  underlineColorAndroid={'transparent'}
-                  placeholderTextColor="rgba(0,0,0,1)"
-                  secureTextEntry
-                  onChangeText={password => this.setState({password})}
-                  value={password}
-                />
-              </Block>
-              <Text
-                medium
-                secondary
-                onPress={() => this.toggleEdit('location')}>
-                {editing === 'location' ? 'Save' : 'Edit'}
-              </Text>
-            </Block>
-
-            <Block row space="between" margin={[10, 0]} style={styles.inputRow}>
-              <TouchableOpacity
-                onPress={() => {
-                  console.log('presssss');
-                  navigation.navigate('Chat', {
-                    user: navigation.getParam('user'),
-                  });
-                }}>
-                <Block>
-                  <Text secondary style={{marginBottom: 10}}>
-                    Enter chat room
-                  </Text>
-                </Block>
-              </TouchableOpacity>
-            </Block>
-          </Block>
-
-          <Divider margin={[theme.sizes.base, theme.sizes.base * 2]} />
-
-          <Block style={styles.toggles}>
-            <Block
-              row
-              center
-              space="between"
-              style={{marginBottom: theme.sizes.base * 2}}>
-              <Text gray2>Notifications</Text>
-              <Switch
-                value={this.state.notifications}
-                onValueChange={value => this.setState({notifications: value})}
-              />
-            </Block>
-            {notifications ? (
-              <Text h6 secondary>
-                Long press on member will notify you when the member wrote a
-                advice.
-              </Text>
-            ) : null}
-            {notifications ? this.showContactsMember() : null}
-          </Block>
-        </ScrollView>
-      </Block>
-    );
+    return <Block>{this.headerBrowser()}</Block>;
   }
 }
 
@@ -302,6 +378,92 @@ Settings.defaultProps = {
 };
 
 export default Settings;
+
+const RecipeInfo = styled.View`
+  flex: 1;
+  margin-left: 12px;
+`;
+const RecipeImage = styled.Image`
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+`;
+const Recipe = styled.View`
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 16px;
+`;
+const Recipes = styled.View`
+  margin-top: 16px;
+`;
+
+const RecipesContainer = styled.View`
+  margin-top: -24px;
+  background-color: #fff;
+  border-top-left-radius: 24px;
+  border-top-right-radius: 24px;
+  border-bottom-left-radius: 44px;
+  border-bottom-right-radius: 44px;
+`;
+
+const ButtonT = styled.TouchableOpacity`
+  margin: 0 0 43px 30px;
+  background-color: rgba(255, 255, 255, 0.3);
+  align-self: flex-start;
+
+  border-radius: 100px;
+`;
+
+const MainRecipe = styled.View`
+  padding: 0 16px;
+  margin: 105px 0 0 0;
+`;
+const Divider = styled.View`
+  border-bottom-color: #fff;
+  border-bottom-width: 2px;
+  width: 150px;
+  margin: 8px 0;
+`;
+const DividerRecepies = styled.View`
+  border-bottom-color: #e7edef;
+  border-bottom-width: 2px;
+  width: 100%;
+  margin: 8px 0px;
+`;
+const TextT = styled.Text`
+  color: ${props => (props.dark ? '#000' : '#FFF')};
+  font-family: 'AvenirNext-Regular';
+
+  ${({title, address, large, small}) => {
+    switch (true) {
+      case title:
+        return `font-size: 32px`;
+      case address:
+        return `font-size: 16px`;
+      case large:
+        return `font-size: 20px`;
+      case small:
+        return `font-size: 13px`;
+    }
+  }}
+
+  ${({bold, heavy}) => {
+    switch (true) {
+      case bold:
+        return `font-weight: 600`;
+      case heavy:
+        return `font-weight: 700`;
+    }
+  }}
+`;
+const Container = styled.View`
+  flex: 1;
+  background-color: #fff;
+`;
+const RecipeBackground = styled.ImageBackground`
+  width: 100%;
+  height: 250px;
+`;
 
 const styles = StyleSheet.create({
   buttonText: {
@@ -332,7 +494,7 @@ const styles = StyleSheet.create({
   },
   itemContainerV2: {
     height: 126 * scale,
-    backgroundColor: 'white',
+    //  backgroundColor: 'white',
     marginLeft: -40 * scale,
   },
   itemIconBackground: {
@@ -362,12 +524,16 @@ const styles = StyleSheet.create({
     height: 128 * scale,
     backgroundColor: 'white',
     flexDirection: 'row',
+    borderBottomWidth: 2,
+    borderBottomColor: '#F5F5F5',
   },
   itemContainerPress: {
     height: 128 * scale,
     backgroundColor: '#51B72B',
     flexDirection: 'row',
     opacity: 0.8,
+    borderBottomWidth: 2,
+    borderBottomColor: '#F5F5F5',
   },
   itemMidText: {
     color: 'black',
@@ -418,11 +584,7 @@ const styles = StyleSheet.create({
     color: 'black',
     marginLeft: 34 * scale,
   },
-  sectionSeperator: {
-    height: 2 * scale,
-    width: 750 * scale,
-    backgroundColor: '#e2e6e7',
-  },
+
   bodycont: {
     flex: 1,
     resizeMode: 'stretch',
@@ -479,6 +641,7 @@ const styles = StyleSheet.create({
     alignSelf: 'stretch',
     width: 300,
     padding: 0,
+    color: '#6F7374',
     //  paddingBottom: 10,
   },
   buttonContainer: {

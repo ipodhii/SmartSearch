@@ -38,6 +38,10 @@ const Advice = mongoose.model(
       required: true,
       min: 10,
     },
+    placeId: {
+      type: String,
+      required: true,
+    },
     city: {
       type: String,
       required: true,
@@ -66,9 +70,10 @@ const Advice = mongoose.model(
 );
 function adviceValidation(customer) {
   const schema = {
-    user: Joi.string().required(),
+    user: Joi.required(),
     phone: Joi.string().required(),
     email: Joi.string().required(),
+    placeId: Joi.string().required(),
     placeName: Joi.string().required(),
     description: Joi.string().required(),
     rating: Joi.string().required(),

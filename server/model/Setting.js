@@ -12,16 +12,16 @@ const settingSchema = new Schema({
     type: String,
   },
   notifiyMembers: {
-    required: true,
     type: String,
   },
 });
 const Setting = mongoose.model('settings', settingSchema);
 function settingValidation(settings) {
+  console.log('printSettings', settings);
   const schema = {
     notification: Joi.string().required(),
     user: Joi.string().required(),
-    notifiyMembers: Joi.string().required(),
+    notifiyMembers: Joi.string(),
   };
   return Joi.validate(settings, schema);
 }

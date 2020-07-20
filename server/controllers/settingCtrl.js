@@ -6,29 +6,80 @@ const _ = require('lodash');
 
 class SettingCtrl {
   async updateSetting(req, res) {
+    logger.log('info', 'put /api/setting');
+    let {notification, notifiyMembers} = req.body;
+    const {error} = settingValidation(req.body);
+    if (error) {
+      logger.log('error', error.details[0].message);
+      return res
+        .status(constants.HTTP_STATUS.SOURCE_NOT_FOUND)
+        .send(error.details[0].message);
+    }
+    let setting = await Setting.findOne({user: req.body.user});
+    if (!setting) {
+      return res.sendStatus(constants.HTTP_STATUS.BAD_REQUEST);
+    }
+    console.log('printSettingBeforeUpdate', setting);
+    setting = await Setting.update(
+      {_id: setting.id},
+      {
+        $set: {
+          notification,
+          notifiyMembers,
+        },
+      },
+    );
+    console.log('printSettingAfterUpdate', setting);
+    setting = new SettingView(setting);
+    return res.sendStatus(constants.HTTP_STATUS.OK);
+  }
+  async createSetting(req, res) {
     logger.log('info', 'post /api/setting');
-    const error = settingValidation(req.body);
+    const {error} = settingValidation(req.body);
     if (error) {
       logger.log('error', error.details[0].message);
       return res.sendStatus(constants.HTTP_STATUS.SOURCE_NOT_FOUND);
     }
-    let setting = await Setting.findOne({user: req.body.user});
-    Setting.update(
-      {_id: setting.id},
-      {
-        $set: {
-          notification: setting.notification,
-        },
-      },
+    let setting = new Setting(
+      _.pick(req.body, ['user', 'notification', 'notifiyMembers']),
     );
-    setting = new SettingView(setting);
-    return res.send(constants.HTTP_STATUS.OK).send();
+    try {
+      setting = await setting.save();
+      setting = new SettingView(setting);
+      return res.status(constants.HTTP_STATUS.OK).send(setting);
+    } catch (err) {
+      return res.status(constants.HTTP_STATUS.ERROR).send(err);
+    }
   }
-  async getSetting(req,res){
+  async getSetting(req, res) {
     logger.log('info', 'get /api/setting');
-    let settings=await Setting.findOne({user: req.body.user});
-    if(!settings){
-      
+    console.log('printSetting', req.query.user);
+    try {
+      let setting = await Setting.findOne({user: req.query.user});
+      if (!setting) {
+        return res
+          .status(constants.HTTP_STATUS.ERROR)
+          .send('Setting doesnt exist.');
+      }
+      setting = new SettingView(setting);
+      return res.status(constants.HTTP_STATUS.OK).send(setting);
+    } catch (err) {
+      return res.status(constants.HTTP_STATUS.ERROR);
+    }
+  }
+  async getAllSettings(user) {
+    try {
+      let settings = await Setting.find({user: {$ne: user}}),
+        settingsView = [];
+      if (!settings) {
+        throw new Error();
+      }
+      for (let setting of settings) {
+        settingsView.push(new SettingView(setting));
+      }
+      return settingsView;
+    } catch (err) {
+      throw new Error();
     }
   }
 }

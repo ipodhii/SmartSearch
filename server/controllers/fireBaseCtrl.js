@@ -1,6 +1,7 @@
 var admin = require('firebase-admin');
 const {Device} = require('../model/Device');
 const UserCtrl = require('./userCtrl');
+
 const SettingCtrl = require('./settingCtrl');
 
 const userCtrl = new UserCtrl();
@@ -15,18 +16,17 @@ admin.initializeApp({
 class FirebaseCtrl {
   async sendNotifications(m) {
     let fcmTokens = await Device.find({user: {$nin: m.user.name}});
-    console.log('printTest', fcmTokens);
+    let userDetailView = await userCtrl.getUserDetailsByMail(m.user.name);
+
     if (!fcmTokens || !fcmTokens.length) {
       console.log('cant find', fcmTokens);
       return;
     }
     fcmTokens = fcmTokens.map(fcm => fcm.fcmToken);
-    console.log('printFcmTokens', fcmTokens);
-    console.log('printMessage', m);
     let message = {
       android: {
         notification: {
-          body: `${m.user.name} wrote a message`,
+          body: `${userDetailView.name} ${userDetailView.lastName} wrote a message`,
           title: 'Chat message',
           icon: 'ic_stat_name',
         },
@@ -46,7 +46,7 @@ class FirebaseCtrl {
       });
   }
 
-  async sendNotificationsToChosenContactsMembers(user) {
+  async sendNotificationsToChosenContactsMembers(user, placeName) {
     try {
       console.log('printUser', user);
       let settings = await settingCtrl.getAllSettings(user),
@@ -86,10 +86,12 @@ class FirebaseCtrl {
       fcmTokens = fcmTokens.map(fcm => fcm.fcmToken);
       console.log('printFcmTokens', fcmTokens);
 
+      let userDetailView = await userCtrl.getUserDetailsByPhone(user);
+
       let message = {
         android: {
           notification: {
-            body: `${user} wrote new advice`,
+            body: `${userDetailView.name} ${userDetailView.lastName} wrote new advice on ${placeName}`,
             title: 'advice notification',
             icon: 'ic_stat_name',
           },

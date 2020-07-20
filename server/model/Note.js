@@ -23,7 +23,7 @@ const Note = mongoose.model('notes', noteSchema);
 function noteValidation(note) {
   const schema = {
     title: Joi.string().required(),
-    content: Joi.string(),
+    content: Joi.string().allow(null, ''),
     user: Joi.string().required(),
   };
   return Joi.validate(note, schema);

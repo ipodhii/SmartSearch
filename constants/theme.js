@@ -2,16 +2,18 @@ const colors = {
   accent: '#F3534A',
   primary: '#0AC4BA',
   secondary: '#51B72B',
-
+  yellow: '#FEDC26',
   tertiary: '#51B72B',
+  tertiary2: '#F11D28',
   black: '#323643',
   white: '#FFFFFF',
   gray: '#51B72B',
   grayn: '#9DA3B4',
-
+  gray4: '#666666',
   gray2: '#C5CCD6',
   //gray2: '#51B72B',
   gray3: '#101115',
+  blackFull: '#000000',
 };
 
 const sizes = {

@@ -19,6 +19,7 @@ import {
   PermissionsAndroid,
   SafeAreaView,
   StatusBar,
+  Modal,
 } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
 
@@ -40,12 +41,15 @@ import LinearGradient from 'react-native-linear-gradient';
 import url from '../config/config';
 //import { Button, Block, Input } from '../components';
 import {theme} from '../constants';
+
 import Images from '../assets/Themes/Images';
 import {ido, mom, yotam, lior, dad, amit} from '../constants/mocks';
 //import {  styleFonts,sizeFonts,typeFonts } from '../assets/Themes/Fonts'
 import styled from 'styled-components';
 
 const scale = Dimensions.get('window').width / 750;
+var WINDOW_HEIGHT = Dimensions.get('window').height;
+
 const HIGIPRIORITY = 2;
 const MEDIUMRIORITY = 1.5;
 const LOWPRIORITY = 1.1;
@@ -83,89 +87,21 @@ export default class SignUp extends Component {
       isSort: false,
       searchStr: '',
       spliceContacts: [],
+      isOpenEditModal: false,
+      chosenMember: {},
+      memberIndex: 0,
+      memberName: '',
+      memberLastName: '',
     };
   }
+
   checkInternetConnection = () => {
     NetInfo.addEventListener(state => {
       console.log('Connection type', state.type);
       console.log('Is connected?', state.isConnected);
     });
   };
-  getContacts() {
-    PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.READ_CONTACTS, {
-      title: 'Contacts',
-      message: 'Smart search app would like to view your contacts.',
-      buttonPositive: 'Please accept bare mortal',
-    }).then(() => {
-      const {navigation} = this.props;
-      Contacts.getAll((err, contacts) => {
-        if (err === 'denied') {
-          navigation.navigate('preSignUp');
-        } else {
-          if (contacts.length > 0) {
-            this.setState({contacts});
-          }
-        }
-      });
-    });
-  }
-  searchContacts = str => {
-    let {isSort, contacts, searchStr} = this.state;
-    let res = [];
-    // if(isSort&&searchStr!==''){
-    res = contacts.filter(member => {
-      if (
-        (member && member.phoneNumbers && member.phoneNumbers.includes(str)) ||
-        (member && member.givenName && member.givenName.includes(str)) ||
-        (member && member.familyName && member.familyName.includes(str))
-      ) {
-        return member;
-      }
-    });
-    console.log('printRes', res);
-    this.setState({spliceContacts: res});
-    //  }
-    return contacts;
-  };
 
-  renderSearch() {
-    return (
-      <View
-        style={{
-          paddingLeft: 60 * scale,
-          paddingRight: 60 * scale,
-          marginTop: 20 * scale,
-          marginBottom: 20 * scale,
-        }}>
-        <View style={styles.singleField}>
-          <View style={{marginTop: 30 * scale, lineHight: 10}}>
-            <Image
-              style={styles.iconBlk}
-              source={require('../assets/images/password_icon.png')}
-            />
-          </View>
-          <TextInput
-            style={styles.textFiled}
-            placeholder="Search"
-            returnKeyType="go"
-            underlineColorAndroid={'transparent'}
-            placeholderTextColor="rgba(0,0,0,1)"
-            value={this.state.searchStr}
-            onChangeText={searchStr => {
-              if (searchStr !== '') {
-                this.searchContacts(searchStr);
-              }
-              this.setState({
-                searchStr,
-                isSort: searchStr !== '' ? true : false,
-              });
-            }}
-            //  ref={(input) => this.passwordInput = input}
-          />
-        </View>
-      </View>
-    );
-  }
   componentDidMount() {
     const {navigation} = this.props;
     let user = navigation.getParam('user');
@@ -174,11 +110,34 @@ export default class SignUp extends Component {
     this.setState({contactsArray, user});
   }
 
+  getPriority(priority) {
+    if (priority === 2) return 'H';
+    if (priority === 1.5) return 'M';
+    return 'L';
+  }
+  updateUser(tmp) {
+    console.log('printuserRestmp', tmp);
+    let {navigation} = this.props;
+    return new Promise((resolve, reject) => {
+      resolve(
+        this.setState({errorMsg: false}, () =>
+          navigation.navigate('Browse', {user: tmp}),
+        ),
+      );
+    });
+  }
   headerBrowser() {
     const {navigation} = this.props;
-    let {contacts, errorMsg, fcmToken, contactsArray} = this.state;
+    let {
+      contacts,
+      errorMsg,
+      fcmToken,
+      contactsArray,
+      spliceContacts,
+    } = this.state;
     let phones = [];
-    console.log('printContactsphones', phones);
+
+    console.log('printContactsphones', contactsArray);
     if (this.state.isLoading) {
       return LOADING;
     }
@@ -210,12 +169,14 @@ export default class SignUp extends Component {
                     </Text>
                   </View>
 
-                  {this.renderSearch()}
+                  {/*this.renderSearch()*/}
                   {/* <View style={[styles.sectionSeperator]}/>*/}
+                  <View style={{marginTop: 60 * scale}} />
                   {contactsArray && contactsArray.length > 0
                     ? contactsArray.map(
                         function(member, index) {
                           if (!member || !member.phone) return;
+                          console.log('printMember', member);
                           phones.push(member.phone);
                           let rightOptions = [
                             {
@@ -249,7 +210,7 @@ export default class SignUp extends Component {
                                 let contactsArray = [
                                   ...this.state.contactsArray,
                                 ];
-                                contactsArray[index].priority = HIGIPRIORITY;
+                                contactsArray[index].priority = MEDIUMRIORITY;
                                 this.setState({contactsArray});
                               }.bind(this),
                               backgroundColor: '#CCCCCC',
@@ -261,7 +222,7 @@ export default class SignUp extends Component {
                                 let contactsArray = [
                                   ...this.state.contactsArray,
                                 ];
-                                contactsArray[index].priority = HIGIPRIORITY;
+                                contactsArray[index].priority = LOWPRIORITY;
                                 this.setState({contactsArray});
                               }.bind(this),
                               backgroundColor: '#CCCCCC',
@@ -275,7 +236,16 @@ export default class SignUp extends Component {
                                 left={leftOptions}
                                 buttonWidth={44}
                                 style={{height: 128 * scale}}>
-                                <TouchableOpacity onLongPress={() => {}}>
+                                <TouchableOpacity
+                                  onPress={() => {
+                                    this.setState({
+                                      isOpenEditModal: true,
+                                      memberIndex: index,
+                                      chosenMember: member,
+                                      memberName: member.name,
+                                      memberLastName: member.lastName,
+                                    });
+                                  }}>
                                   <View>
                                     <View>
                                       <View
@@ -292,21 +262,45 @@ export default class SignUp extends Component {
                                           </View>
                                         </View>
 
-                                        <View style={styles.itemMidContainer}>
-                                          <Text style={styles.itemMidText}>
-                                            {`${
-                                              member.name
-                                                ? member.name.replace(/\s/g, '')
-                                                : ''
-                                            } ${
-                                              member.lastName
-                                                ? member.lastName.replace(
-                                                    /\s/g,
-                                                    '',
-                                                  )
-                                                : ''
-                                            }`}
-                                          </Text>
+                                        <View style={[styles.itemMidContainer]}>
+                                          <View
+                                            style={{
+                                              flexDirection: 'row',
+                                            }}>
+                                            <Text style={[styles.itemMidText]}>
+                                              {`${
+                                                member.name
+                                                  ? member.name.replace(
+                                                      /\s/g,
+                                                      '',
+                                                    )
+                                                  : ''
+                                              } ${
+                                                member.lastName
+                                                  ? member.lastName.replace(
+                                                      /\s/g,
+                                                      '',
+                                                    )
+                                                  : ''
+                                              }`}
+                                            </Text>
+                                            <Text
+                                              style={{
+                                                position: 'absolute',
+                                                left: 450 * scale,
+                                                top: 20 * scale,
+                                                fontWeight: 'bold',
+                                                fontSize: 26 * scale,
+                                                color:
+                                                  this.getPriority(
+                                                    member.priority,
+                                                  ) === 'H'
+                                                    ? '#51B72B'
+                                                    : '#CCCCCC',
+                                              }}>{`(${this.getPriority(
+                                              member.priority,
+                                            )})`}</Text>
+                                          </View>
                                           <View
                                             style={
                                               styles.itemMidDescriptionContainer
@@ -345,7 +339,7 @@ export default class SignUp extends Component {
                         color: 'rgba(200, 0, 0, 0.8)',
                         textAlign: 'center',
                       }}>
-                      Failed to register.
+                      Failed to save.
                     </Text>
                   </View>
                 )}
@@ -355,9 +349,9 @@ export default class SignUp extends Component {
                     let {user} = this.state;
                     let body = JSON.stringify({
                       id: user.id,
-                      userContactsMember: contactsArray,
+                      userContactsMember: JSON.stringify(contactsArray),
                     });
-                    console.log('printcheckphonenenenene', body);
+                    console.log('printBody', body);
                     console.log('printUrl', `${url}api/user`);
 
                     try {
@@ -370,11 +364,14 @@ export default class SignUp extends Component {
                         body,
                       });
                       const tmp = await convertToJson(res);
+                      await this.updateUser(tmp);
+                      /*
                       this.setState({errorMsg: false}, () =>
-                        navigation.navigate('Menu', {user: tmp}),
+                        navigation.navigate('Menu', {user: userRes}),
                       );
+                      */
                     } catch (e) {
-                      console.log('printeeee', e);
+                      console.log('printeeeeeeeee', e);
                       this.setState({errorMsg: true});
                     }
                   }}>
@@ -414,6 +411,128 @@ export default class SignUp extends Component {
             </Recipes>
           </RecipesContainer>
         </Container>
+        <Modal
+          animationType={'slide'}
+          visible={this.state.isOpenEditModal}
+          onRequestClose={function() {
+            this.setState({
+              isOpenEditModal: false,
+            });
+          }.bind(this)}>
+          <View style={[styles.modalBack]}>
+            <View style={[styles.dialogBack]}>
+              <Text
+                style={[
+                  styles.header,
+                  {
+                    marginBottom: 50 * scale,
+                    marginTop: 40 * scale,
+                    textAlign: 'center',
+                    marginRight: 70 * scale,
+                  },
+                ]}
+                h1>
+                Edit member
+              </Text>
+              <View style={[styles.singleField]}>
+                <TextInput
+                  // enabled={this.state.isOpenEditModal}
+                  style={[
+                    styles.textFiled,
+                    {
+                      fontSize: 30 * scale,
+                      fontWeight: 'bold',
+                      textAlign: 'center',
+                      color: 'black',
+                    },
+                  ]}
+                  placeholder="name"
+                  underlineColorAndroid={'transparent'}
+                  placeholderTextColor="rgba(0,0,0,1)"
+                  value={this.state.memberName}
+                  onChangeText={memberName => this.setState({memberName})}
+                />
+              </View>
+
+              <View style={[styles.singleField]}>
+                <TextInput
+                  // enabled={this.state.isOpenEditModal}
+                  style={[
+                    styles.textFiled,
+                    {
+                      fontSize: 30 * scale,
+                      textAlign: 'center',
+                      fontWeight: 'bold',
+                      color: 'black',
+                    },
+                  ]}
+                  placeholder="Last name"
+                  underlineColorAndroid={'transparent'}
+                  placeholderTextColor="rgba(0,0,0,1)"
+                  value={this.state.memberLastName}
+                  onChangeText={memberLastName =>
+                    this.setState({memberLastName})
+                  }
+                />
+              </View>
+
+              <View style={{marginTop: 30 * scale}} />
+              <View
+                style={{
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}>
+                <TouchableOpacity
+                  style={styles.button}
+                  onPress={async () => {
+                    let {
+                      chosenMember,
+                      memberIndex,
+                      memberLastName,
+                      memberName,
+                    } = this.state;
+                    chosenMember.lastName = memberLastName;
+                    chosenMember.name = memberName;
+                    let nContactsArray = [...contactsArray];
+                    console.log('printchosenMember1', chosenMember);
+                    nContactsArray[memberIndex] = chosenMember;
+                    console.log(
+                      'printchosenMember12',
+                      nContactsArray[memberIndex],
+                    );
+                    this.setState({
+                      isOpenEditModal: false,
+                      memberIndex: 0,
+                      chosenMember: {},
+                      contactsArray: nContactsArray,
+                    });
+                  }}>
+                  <Text style={[styles.buttonText]}>{'APPLY'}</Text>
+                </TouchableOpacity>
+              </View>
+
+              <View
+                style={{
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}>
+                <TouchableOpacity
+                  style={styles.Cancelbutton}
+                  onPress={function() {
+                    this.setState({
+                      isOpenEditModal: false,
+                      chosenNote: {},
+                      memberIndex: 0,
+                      memberName: '',
+                      memberLastName: '',
+                    });
+                  }.bind(this)}>
+                  <Text style={styles.buttonCancelText}>{'CANCEL'}</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
       </ScrollView>
     );
   }
@@ -520,6 +639,34 @@ const styles = StyleSheet.create({
     margin: 10,
     //   color: '#ffffff',
     backgroundColor: 'transparent',
+  },
+  dialogBack: {
+    width: '90%',
+    height: '60%',
+    backgroundColor: 'white',
+  },
+  buttonCancelText: {
+    textAlign: 'center',
+    justifyContent: 'center',
+    fontFamily: 'Lato-Bold',
+    fontSize: 30 * scale,
+    color: 'black',
+  },
+  Cancelbutton: {
+    borderRadius: 65 * scale,
+    marginBottom: 40 * scale,
+    marginTop: 40 * scale,
+    height: 90 * scale,
+    width: 400 * scale,
+    alignItems: 'center',
+    textAlign: 'center',
+    justifyContent: 'center',
+  },
+  modalBack: {
+    alignItems: 'center',
+    paddingTop: 200 * scale,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    height: WINDOW_HEIGHT,
   },
   linearGradient: {
     width: '85%',
@@ -751,11 +898,11 @@ const styles = StyleSheet.create({
     marginRight: 10,
     marginBottom: 10,
   },
-}); /*
+}); /*}*/ /*
 </View>
 </View>
 </View>
-*/ /*}*/
+*/
 
 /*
  return (

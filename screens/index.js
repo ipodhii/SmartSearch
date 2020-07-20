@@ -7,9 +7,12 @@ import Welcome from './Welcome';
 import SignUp from './SignUp';
 import preSignUp from './preSignUp';
 import Advice from './Advice';
-import EmailList from './emailList';
+import Notificatios from './Notificatios';
 import Forgot from './Forgot';
 import Chat from './Chat';
+import Menu from './Menu';
+import Notes from './Notes';
+import ContactList from './ContactList';
 
 module.exports = {
   Browse,
@@ -21,7 +24,10 @@ module.exports = {
   SignUp,
   preSignUp,
   Advice,
-  EmailList,
+  Notificatios,
   Forgot,
   Chat,
+  Menu,
+  Notes,
+  ContactList,
 };

@@ -75,24 +75,36 @@ class UserCtrl {
       return res.status(constants.HTTP_STATUS.ERROR).send(err);
     }
   }
+  async getUserDetailsByMail(email) {
+    let user = await User.findOne({email});
+    user = new UserView(user);
+    return user;
+  }
+  async getUserDetailsByPhone(phone) {
+    let user = await User.findOne({phone});
+    user = new UserView(user);
+    return user;
+  }
   async getUser(req, res) {
     logger.log('info', '/api/user:email');
     if (!req.query || !req.query.email) {
       return res.sendStatus(constants.HTTP_STATUS.BAD_REQUEST);
     }
     let user = await User.findOne({email: req.query.email});
-    console.log('printHeader', user, req.query, req.query.email);
+    // console.log('printHeader', user, req.query, req.query.email);
     user = new UserView(user);
-    res.send(user);
+    res.status(constants.HTTP_STATUS.OK).send(user);
   }
   async updateUser(req, res) {
     logger.log('info', '/api/user:email');
-    let user = await User.findOne({_id: req.body.id});
     try {
-      user.userContactsMember = req.body.userContactsMember;
+      let {id, userContactsMember} = req.body;
+      let user = await User.findById({_id: id});
+      user.userContactsMember = userContactsMember;
       user = await user.save();
+      // user = await user.save();
       user = new UserView(user);
-      res.send(user);
+      res.status(constants.HTTP_STATUS.OK).send(user);
     } catch (err) {
       logger.log('error', err);
       return res.status(constants.HTTP_STATUS.ERROR).send(err);
@@ -160,7 +172,33 @@ class UserCtrl {
       throw new Error();
     }
   }
-  async setPasswordMail(req, res) {
+  async changePassword(req, res) {
+    let {email, newPassword} = req.body;
+    // let email = req.body.email;
+    //find user by mail
+    let user = await User.findOne({email});
+    console.log('printUser', user);
+    if (!user) {
+      return res
+        .status(constants.HTTP_STATUS.ERROR)
+        .send('Email doesnt exist.');
+    }
+    //generate new password, hash it and update user object
+    const salt = await bcrypt.genSalt(constants.SALT_ROUNDS);
+    const hashPassword = await bcrypt.hash(newPassword, salt);
+    const hashConfirmPassword = await bcrypt.hash(newPassword, salt);
+    user.password = hashPassword;
+    user.confirmPassword = hashConfirmPassword;
+    console.log('printnewuser', user);
+    try {
+      user = await user.save();
+      return res.sendStatus(constants.HTTP_STATUS.OK);
+    } catch (err) {
+      console.log('error total', user);
+      return res.status(constants.HTTP_STATUS.ERROR).send(err);
+    }
+  }
+  async resetPassword(req, res) {
     let transport = nodemailer.createTransport(constants.SMTP);
     let email = req.body.email;
     //find user by mail
@@ -207,18 +245,24 @@ class UserCtrl {
   async getAdvicesFromContacts(req, res) {
     logger.log('info', '/api/useradvices');
     let allPromises = [];
-    let user = await User.findOne({email: req.body.email});
+    let {email, isSearch} = req.body;
+    let user = await User.findOne({email});
     if (!user) {
       return res.send(constants.HTTP_STATUS.BAD_REQUEST);
     }
     let userContactsMember = JSON.parse(user.userContactsMember);
     let querys = buildUserQuery(req.body);
-    console.log('hehhehehee2', querys);
     userContactsMember = userContactsMember.sort(
       (memberA, memberB) => memberB.priority - memberA.priority,
     );
     userContactsMember.map(member => {
-      console.log('peintmmm', member);
+      if (isSearch) {
+        return allPromises.push(
+          new Promise(function(resolve, reject) {
+            resolve(Advice.find({phone: member.phone}).populate('user'));
+          }),
+        );
+      }
       return allPromises.push(
         new Promise(function(resolve, reject) {
           resolve(
@@ -244,9 +288,6 @@ class UserCtrl {
             }
           }
         }
-
-        console.log('advicesssssssss1', JSON.stringify(dicionaryAdvices));
-
         return res
           .status(constants.HTTP_STATUS.OK)
           .send(dicionaryAdvices.items);

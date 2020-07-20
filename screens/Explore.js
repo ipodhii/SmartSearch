@@ -150,6 +150,20 @@ class Explore extends Component {
       : !contactsMembersDictionary[index];
     this.setState({contactsMembersDictionary});
   }
+
+  getMemberDetails(member) {
+    let {navigation} = this.props;
+    let user = navigation.getParam('user');
+    let userContactsMember = JSON.parse(user.userContactsMember);
+    let res = userContactsMember.find(m => m.phone === member.phone);
+    console.log('getMemberDetails', res);
+    let name = res.name ? res.name : null;
+    let lastName = res.lastName ? res.lastName : null;
+    let textRes = '';
+    if (name) textRes += `${name} `;
+    if (lastName) textRes += `${lastName}`;
+    return textRes;
+  }
   render() {
     let {
       place,
@@ -200,6 +214,7 @@ class Explore extends Component {
               {place.userAdvices && place.userAdvices.length ? (
                 place.userAdvices.map((place, index) => {
                   console.log('printplaaaace', place);
+                  // this.getMemberDetails(place);
                   return (
                     <View>
                       <TouchableOpacity
@@ -213,11 +228,10 @@ class Explore extends Component {
                           ]}>
                           <View style={[styles.itemMidContainer]}>
                             <Text
-                              style={[styles.itemMidText]}
+                              style={[styles.itemMidText, {textAlign: 'left'}]}
                               numberOfLines={1}>
+                              {this.getMemberDetails(place)}
                               {FULL_STAR}
-                              {place.user.name || 'n/a'}{' '}
-                              {place.user.lastName || 'n/a'}
                             </Text>
 
                             <View style={styles.itemMidDescriptionContainer}>

@@ -6,21 +6,21 @@ const _ = require('lodash');
 
 class NoteCtrl {
   async updateNote(req, res) {
-    logger.log('info', 'put /api/notes');
-    let {title, content, user} = req.body;
-    const {error} = noteValidation(req.body);
+    logger.log('info', 'put update /api/notes');
+    let {title, content, user, id} = req.body;
+    const {error} = noteValidation({title, content, user});
     if (error) {
       logger.log('error', error.details[0].message);
       return res
         .status(constants.HTTP_STATUS.SOURCE_NOT_FOUND)
         .send(error.details[0].message);
     }
-    let note = await Note.findOne({user});
+    let note = await Note.findById({_id: id});
     if (!note) {
       return res.sendStatus(constants.HTTP_STATUS.BAD_REQUEST);
     }
-    note = await Note.update(
-      {_id: note.id},
+    note = await Note.findOneAndUpdate(
+      {_id: id},
       {
         $set: {
           title,

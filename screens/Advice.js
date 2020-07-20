@@ -110,11 +110,27 @@ export default class Advice extends Component {
       });
     }
   }
+  getCity() {
+    let {city} = this.state;
+    console.log('printCity', city);
+    return city ? `in+${city}+` : ``;
+  }
+  getCountry() {
+    let {country} = this.state;
+    console.log('printcountryObject', country);
+    return country ? `region=${country}&` : ``;
+  }
+  getSearch() {
+    let {placeName} = this.state;
+    return placeName;
+  }
   fetchData = () => {
-    let {type, city, placeName, country} = this.state;
-    let url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=places+in+${city}+${type}+${placeName}&region=${country}&key=${API_KEY}`;
+    //   let {type, city, placeName, country} = this.state;
+    let url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=places+${this.getCity()}${this.getSearch()}&${this.getCountry()}key=${API_KEY}`;
+    // let url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=places+in+${city}+${type}+${placeName}&region=${country}&key=${API_KEY}`;
     //    let url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${placeName}&key=${API_KEY}`;
     // return firstStationMockAdvice;
+    console.log('printURLLLLL', url);
     return fetch(url).then(convertToJson);
   };
   toggleModal(modalVisible) {

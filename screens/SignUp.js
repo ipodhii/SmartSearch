@@ -17,11 +17,12 @@ import {
   Dimensions,
   ScrollView,
   PermissionsAndroid,
+  SafeAreaView,
+  StatusBar,
 } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
 
 import {
-  Container,
   Content,
   Item,
   Tabs,
@@ -42,6 +43,7 @@ import {theme} from '../constants';
 import Images from '../assets/Themes/Images';
 import {ido, mom, yotam, lior, dad, amit} from '../constants/mocks';
 //import {  styleFonts,sizeFonts,typeFonts } from '../assets/Themes/Fonts'
+import styled from 'styled-components';
 
 const scale = Dimensions.get('window').width / 750;
 const HIGIPRIORITY = 2;
@@ -60,13 +62,15 @@ const pdu = (
   />
 );
 
-
-
 const LOADING = (
   <View style={CENTER_STYLE}>
     <ActivityIndicator size={'large'} animating={true} />
   </View>
 );
+function convertToJson(res) {
+  if (!res) return res;
+  return res.json();
+}
 export default class SignUp extends Component {
   constructor(props) {
     super(props);
@@ -74,7 +78,7 @@ export default class SignUp extends Component {
     this.state = {
       isLoading: false,
       //  contacts: amit,
-      contacts: ido,
+      contacts: amit,
       errorMsg: false,
       isSort: false,
       searchStr: '',
@@ -112,8 +116,12 @@ export default class SignUp extends Component {
     res = contacts.filter(member => {
       if (
         (member && member.phoneNumbers && member.phoneNumbers.includes(str)) ||
-        (member && member.givenName && member.givenName.includes(str)) ||
-        (member && member.familyName && member.familyName.includes(str))
+        (member &&
+          member.givenName &&
+          member.givenName.toLowerCase().includes(str.toLowerCase())) ||
+        (member &&
+          member.familyName &&
+          member.familyName.toLowerCase().includes(str.toLowerCase()))
       ) {
         return member;
       }
@@ -162,15 +170,24 @@ export default class SignUp extends Component {
       </View>
     );
   }
-  componentDidMount() {
+  async componentDidMount() {
     if (1 !== 1) {
       this.getContacts();
     }
+    const fcmToken = await AsyncStorage.getItem('fcmToken');
+    this.setState({fcmToken});
   }
 
-  render() {
+  headerBrowser() {
     const {navigation} = this.props;
-    let {contacts, spliceContacts, isSort, searchStr, errorMsg} = this.state;
+    let {
+      contacts,
+      spliceContacts,
+      isSort,
+      searchStr,
+      errorMsg,
+      fcmToken,
+    } = this.state;
     let phones = [];
     console.log('printContactsphones', phones);
     if (this.state.isLoading) {
@@ -178,88 +195,93 @@ export default class SignUp extends Component {
     }
     let contactsArray = !isSort || searchStr === '' ? contacts : spliceContacts;
     return (
-      <Block>
-        <ScrollView>
-          <View>
-            <Block
-              flex={false}
-              row
-              center
-              space="between"
-              style={styles.header}>
-              <View style={{marginTop: 20 * scale}}>
-                <Text h1 bold>
-                  Register
-                </Text>
-              </View>
-            </Block>
-            <View style={styles.header}>
-              <Text h4 secondary>
-                Modifiy priority for your contacts member by swipe left or
-                remove them by swipe right
-              </Text>
-            </View>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <Container>
+          <StatusBar barStyle="light-content" />
+          <RecipeBackground source={Images.contactsMember2}>
+            <SafeAreaView>
+              <MainRecipe>
+                <TextT title heavy>
+                  Contacts member
+                </TextT>
+                <Divider />
+                <TextT address bold>
+                  {`Register to our app.`}
+                </TextT>
+              </MainRecipe>
+            </SafeAreaView>
+          </RecipeBackground>
+          <RecipesContainer style={{zIndex: 444}}>
+            <Recipes>
+              <ScrollView>
+                <View>
+                  <View style={styles.header}>
+                    <Text bold h4 black>
+                      Modifiy priority for your contacts member by swipe left or
+                      remove them by swipe right
+                    </Text>
+                  </View>
 
-            {this.renderSearch()}
-            {/* <View style={[styles.sectionSeperator]}/>*/}
-            {contactsArray && contactsArray.length > 0
-              ? contactsArray.map(
-                  function(member, index) {
-                    if (!member || !member.phoneNumbers[0]) return;
-                    phones.push(member.phoneNumbers[0].number);
-                    let rightOptions = [
-                      {
-                        text: 'Delete',
-                        onPress: function() {
-                          let nContactList = [...this.state.contacts];
-                          nContactList.splice(index, 1);
-                          this.setState({contacts: nContactList});
-                        }.bind(this),
-                        backgroundColor: '#ff5151',
-                      },
-                    ];
-                    let leftOptions = [
-                      {
-                        text: 'High',
-                        onPress: function() {
-                          let nContactList = [...this.state.contacts];
-                          nContactList[index].priority = HIGIPRIORITY;
-                          this.setState({contacts: nContactList});
-                        }.bind(this),
-                        backgroundColor: '#51B72B',
-                      },
-                      ,
-                      {
-                        text: 'Medium',
-                        onPress: function() {
-                          let nContactList = [...this.state.contacts];
-                          nContactList[index].priority = MEDIUMRIORITY;
-                          this.setState({contacts: nContactList});
-                        }.bind(this),
-                        backgroundColor: '#CCCCCC',
-                      },
-                      ,
-                      {
-                        text: 'Low',
-                        onPress: function() {
-                          let nContactList = [...this.state.contacts];
-                          nContactList[index].priority = LOWPRIORITY;
-                          this.setState({contacts: nContactList});
-                        }.bind(this),
-                        backgroundColor: '#CCCCCC',
-                      },
-                    ];
-                    return (
-                      <View style={[styles.itemContainerV2]} key={Guid()}>
-                        <SwipeBtn
-                          autoClose={true}
-                          right={rightOptions}
-                          left={leftOptions}
-                          buttonWidth={44}
-                          style={{height: 128 * scale}}>
-                          <TouchableOpacity
-                            onLongPress={() => {
-                              /*
+                  {this.renderSearch()}
+                  {/* <View style={[styles.sectionSeperator]}/>*/}
+                  {contactsArray && contactsArray.length > 0
+                    ? contactsArray.map(
+                        function(member, index) {
+                          if (!member || !member.phoneNumbers[0]) return;
+                          phones.push(member.phoneNumbers[0].number);
+                          let rightOptions = [
+                            {
+                              text: 'Delete',
+                              onPress: function() {
+                                let nContactList = [...this.state.contacts];
+                                nContactList.splice(index, 1);
+                                this.setState({contacts: nContactList});
+                              }.bind(this),
+                              backgroundColor: '#ff5151',
+                            },
+                          ];
+                          let leftOptions = [
+                            {
+                              text: 'High',
+                              onPress: function() {
+                                let nContactList = [...this.state.contacts];
+                                nContactList[index].priority = HIGIPRIORITY;
+                                this.setState({contacts: nContactList});
+                              }.bind(this),
+                              backgroundColor: '#51B72B',
+                            },
+                            ,
+                            {
+                              text: 'Medium',
+                              onPress: function() {
+                                let nContactList = [...this.state.contacts];
+                                nContactList[index].priority = MEDIUMRIORITY;
+                                this.setState({contacts: nContactList});
+                              }.bind(this),
+                              backgroundColor: '#CCCCCC',
+                            },
+                            ,
+                            {
+                              text: 'Low',
+                              onPress: function() {
+                                let nContactList = [...this.state.contacts];
+                                nContactList[index].priority = LOWPRIORITY;
+                                this.setState({contacts: nContactList});
+                              }.bind(this),
+                              backgroundColor: '#CCCCCC',
+                            },
+                          ];
+                          return (
+                            <View style={[styles.itemContainerV2]} key={Guid()}>
+                              <SwipeBtn
+                                autoClose={true}
+                                right={rightOptions}
+                                left={leftOptions}
+                                buttonWidth={44}
+                                style={{height: 128 * scale}}>
+                                <TouchableOpacity
+                                  onLongPress={() => {
+                                    /*
                               if (!this.state.contacts[index].highPriority) {
                                 console.log('longPressMakeTrue');
                                 let nContactList = [...this.state.contacts];
@@ -272,167 +294,186 @@ export default class SignUp extends Component {
                                 this.setState({contacts: nContactList});
                               }
                               */
-                            }}>
-                            <View>
-                              <View>
-                                <View
-                                  style={[
-                                    !this.state.contacts[index].highPriority
-                                      ? styles.itemContainer
-                                      : styles.itemContainerPress,
-                                  ]}>
-                                  <View style={styles.itemIconContainer}>
-                                    <View style={styles.itemIconBackground}>
-                                      {pdu}
-                                    </View>
-                                  </View>
+                                  }}>
+                                  <View>
+                                    <View>
+                                      <View
+                                        style={[
+                                          !this.state.contacts[index]
+                                            .highPriority
+                                            ? styles.itemContainer
+                                            : styles.itemContainerPress,
+                                        ]}>
+                                        <View style={styles.itemIconContainer}>
+                                          <View
+                                            style={styles.itemIconBackground}>
+                                            {pdu}
+                                          </View>
+                                        </View>
 
-                                  <View style={styles.itemMidContainer}>
-                                    <Text style={styles.itemMidText}>
-                                      {`${
-                                        member.givenName
-                                          ? member.givenName.replace(/\s/g, '')
-                                          : ''
-                                      } ${
-                                        member.familyName
-                                          ? member.familyName.replace(/\s/g, '')
-                                          : ''
-                                      }`}
-                                    </Text>
-                                    <View
-                                      style={
-                                        styles.itemMidDescriptionContainer
-                                      }>
-                                      <Text style={{color: '#6F7374'}}>
-                                        {member.phoneNumbers[0].number
-                                          ? member.phoneNumbers[0].number.replace(
-                                              /\s/g,
-                                              '',
-                                            )
-                                          : 'N/A'}
-                                      </Text>
+                                        <View style={styles.itemMidContainer}>
+                                          <Text style={styles.itemMidText}>
+                                            {`${
+                                              member.givenName
+                                                ? member.givenName.replace(
+                                                    /\s/g,
+                                                    '',
+                                                  )
+                                                : ''
+                                            } ${
+                                              member.familyName
+                                                ? member.familyName.replace(
+                                                    /\s/g,
+                                                    '',
+                                                  )
+                                                : ''
+                                            }`}
+                                          </Text>
+                                          <View
+                                            style={
+                                              styles.itemMidDescriptionContainer
+                                            }>
+                                            <Text style={{color: '#6F7374'}}>
+                                              {member.phoneNumbers[0].number
+                                                ? member.phoneNumbers[0].number.replace(
+                                                    /\s/g,
+                                                    '',
+                                                  )
+                                                : 'N/A'}
+                                            </Text>
+                                          </View>
+                                        </View>
+                                        <View style={styles.itemRightContainer}>
+                                          {/*<Text> {this.props.app && this.props.app.policy && this.props.app.policy.type ? this.props.app.policy.type : ''}</Text>*/}
+                                        </View>
+                                      </View>
                                     </View>
-                                  </View>
-                                  <View style={styles.itemRightContainer}>
-                                    {/*<Text> {this.props.app && this.props.app.policy && this.props.app.policy.type ? this.props.app.policy.type : ''}</Text>*/}
-                                  </View>
-                                </View>
-                              </View>
 
-                              <View style={[styles.sectionSeperator]} />
+                                    <View style={[styles.sectionSeperator]} />
+                                  </View>
+                                </TouchableOpacity>
+                              </SwipeBtn>
                             </View>
-                          </TouchableOpacity>
-                        </SwipeBtn>
-                      </View>
+                          );
+                        }.bind(this),
+                      )
+                    : LOADING}
+                </View>
+
+                {errorMsg && (
+                  <View>
+                    <Text
+                      style={{
+                        color: 'rgba(200, 0, 0, 0.8)',
+                        textAlign: 'center',
+                      }}>
+                      Failed to register.
+                    </Text>
+                  </View>
+                )}
+                <View style={{marginTop: 60 * scale}} />
+                <TouchableOpacity
+                  onPress={async () => {
+                    let userContactsMember = [];
+                    contacts.map(member => {
+                      if (
+                        member &&
+                        member.phoneNumbers[0] &&
+                        member.phoneNumbers[0].number
+                      ) {
+                        let phone = member.phoneNumbers[0].number;
+                        let name = member.givenName;
+                        let priority = member.priority || LOWPRIORITY;
+                        let lastName = member.familyName;
+                        console.log('printPhoneBefore', priority, name);
+                        if (phone.slice(0, 4) === '+972') {
+                          phone = phone.replace('+972', '0');
+                        }
+                        phone = phone.split(' ').join('');
+                        phone = phone.split('-').join('');
+                        phone = phone.slice(0, 3) + '-' + phone.slice(3);
+                        console.log('printPhoneAfter', phone);
+                        userContactsMember.push({
+                          phone,
+                          name,
+                          lastName,
+                          priority,
+                        });
+                      }
+                    });
+                    console.log(
+                      'checkuserContactsMember',
+                      JSON.stringify(userContactsMember),
                     );
-                  }.bind(this),
-                )
-              : LOADING}
-          </View>
 
-          {errorMsg && (
-            <View>
-              <Text
-                style={{color: 'rgba(200, 0, 0, 0.8)', textAlign: 'center'}}>
-                Failed to register.
-              </Text>
-            </View>
-          )}
-          <View style={{marginTop: 60 * scale}} />
-          <TouchableOpacity
-            onPress={() => {
-              let userContactsMember = [];
-              contacts.map(member => {
-                if (
-                  member &&
-                  member.phoneNumbers[0] &&
-                  member.phoneNumbers[0].number
-                ) {
-                  let phone = member.phoneNumbers[0].number;
-                  let name = member.givenName;
-                  let priority = member.priority || LOWPRIORITY;
-                  let lname = member.familyName;
-                  console.log('printPhoneBefore', priority, name);
-                  if (phone.slice(0, 4) === '+972') {
-                    phone = phone.replace('+972', '0');
-                  }
-                  phone = phone.split(' ').join('');
-                  phone = phone.split('-').join('');
-                  phone = phone.slice(0, 3) + '-' + phone.slice(3);
-                  console.log('printPhoneAfter', phone);
-                  userContactsMember.push({
-                    phone,
-                    name,
-                    lname,
-                    priority,
-                  });
-                }
-              });
-              console.log(
-                'checkuserContactsMember',
-                JSON.stringify(userContactsMember),
-              );
+                    let body = JSON.stringify({
+                      name: navigation.getParam('name'),
+                      lastName: navigation.getParam('lastName'),
+                      phone: navigation.getParam('phone'),
+                      email: navigation.getParam('email'),
+                      password: navigation.getParam('password'),
+                      confirmPassword: navigation.getParam('confirmPassword'),
+                      userContactsMember: JSON.stringify(userContactsMember),
+                      fcmToken,
+                    });
+                    console.log('printcheckphonenenenene', body);
+                    console.log('printUrl', `${url}api/register`);
 
-              let body = JSON.stringify({
-                phone: navigation.getParam('phone'),
-                email: navigation.getParam('email'),
-                password: navigation.getParam('password'),
-                confirmPassword: navigation.getParam('confirmPassword'),
-                userContactsMember: JSON.stringify(userContactsMember),
-              });
-              console.log('printcheckphonenenenene', JSON.stringify(body));
-              console.log('printUrl', `${url}api/register`);
-
-              fetch(`${url}api/register`, {
-                method: 'POST',
-                headers: {
-                  Accept: 'application/json',
-                  'Content-Type': 'application/json',
-                },
-                body,
-              })
-                .then(res => {
-                  const status = res.status;
-                  if (status !== 200) {
-                    this.setState({errorMsg: true});
-                  } else {
-                    console.log('printNewUser', res.json());
-                    this.setState({errorMsg: false}, () =>
-                      navigation.navigate('Browse', {user: res.json()}),
-                    );
-                  }
-                })
-                .catch(err => {
-                  console.log('errorregister', err);
-                  this.setState({errorMsg: true});
-                });
-            }}>
-            <LinearGradient
-              start={{x: 4, y: 2}}
-              end={{x: 0, y: 0}}
-              colors={['#FFFFFF', '#EFEFEF']}
-              opacity={0.8}
-              style={styles.linearGradient}>
-              <Text
-                h3
-                secondary
-                style={[
-                  styles.buttonText,
-                  {marginTop: theme.sizes.padding / 2},
-                ]}>
-                Confirm
-              </Text>
-            </LinearGradient>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.navigate('preSignUp')}>
-            <Text gray h4 center style={{textDecorationLine: 'underline'}}>
-              Back
-            </Text>
-          </TouchableOpacity>
-          <View style={{marginTop: '3%'}} />
-        </ScrollView>
-      </Block>
+                    try {
+                      const res = await fetch(`${url}api/register`, {
+                        method: 'POST',
+                        headers: {
+                          Accept: 'application/json',
+                          'Content-Type': 'application/json',
+                        },
+                        body,
+                      });
+                      const tmp = await convertToJson(res);
+                      this.setState({errorMsg: false}, () =>
+                        navigation.navigate('Browse', {user: tmp}),
+                      );
+                    } catch (e) {
+                      console.log('printeeee', e);
+                      this.setState({errorMsg: true});
+                    }
+                  }}>
+                  <LinearGradient
+                    start={{x: 4, y: 2}}
+                    end={{x: 0, y: 0}}
+                    colors={['#FFFFFF', '#EFEFEF']}
+                    opacity={0.8}
+                    style={styles.linearGradient}>
+                    <Text
+                      h3
+                      secondary
+                      style={[
+                        styles.buttonText,
+                        {marginTop: theme.sizes.padding / 2},
+                      ]}>
+                      Confirm
+                    </Text>
+                  </LinearGradient>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('preSignUp')}>
+                  <Text
+                    gray
+                    h4
+                    center
+                    style={{textDecorationLine: 'underline'}}>
+                    Back
+                  </Text>
+                </TouchableOpacity>
+                <View style={{marginTop: '3%'}} />
+              </ScrollView>
+            </Recipes>
+          </RecipesContainer>
+        </Container>
+      </ScrollView>
     );
+  }
+  render() {
+    return <Block>{this.headerBrowser()}</Block>;
   }
 }
 
@@ -440,6 +481,92 @@ export default class SignUp extends Component {
 
 
 */
+
+const RecipeInfo = styled.View`
+  flex: 1;
+  margin-left: 12px;
+`;
+const RecipeImage = styled.Image`
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+`;
+const Recipe = styled.View`
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 16px;
+`;
+const Recipes = styled.View`
+  margin-top: 16px;
+`;
+
+const RecipesContainer = styled.View`
+  margin-top: -24px;
+  background-color: #fff;
+  border-top-left-radius: 24px;
+  border-top-right-radius: 24px;
+  border-bottom-left-radius: 44px;
+  border-bottom-right-radius: 44px;
+`;
+
+const ButtonT = styled.TouchableOpacity`
+  margin: 0 0 43px 30px;
+  background-color: rgba(255, 255, 255, 0.3);
+  align-self: flex-start;
+
+  border-radius: 100px;
+`;
+
+const MainRecipe = styled.View`
+  padding: 0 16px;
+  margin: 135px 0 0 0;
+`;
+const Divider = styled.View`
+  border-bottom-color: #fff;
+  border-bottom-width: 2px;
+  width: 150px;
+  margin: 8px 0;
+`;
+const DividerRecepies = styled.View`
+  border-bottom-color: #e7edef;
+  border-bottom-width: 2px;
+  width: 100%;
+  margin: 8px 0px;
+`;
+const TextT = styled.Text`
+  color: ${props => (props.dark ? '#000' : '#FFF')};
+  font-family: 'AvenirNext-Regular';
+
+  ${({title, address, large, small}) => {
+    switch (true) {
+      case title:
+        return `font-size: 32px`;
+      case address:
+        return `font-size: 16px`;
+      case large:
+        return `font-size: 20px`;
+      case small:
+        return `font-size: 13px`;
+    }
+  }}
+
+  ${({bold, heavy}) => {
+    switch (true) {
+      case bold:
+        return `font-weight: 600`;
+      case heavy:
+        return `font-weight: 700`;
+    }
+  }}
+`;
+const Container = styled.View`
+  flex: 1;
+  background-color: #fff;
+`;
+const RecipeBackground = styled.ImageBackground`
+  width: 100%;
+  height: 250px;
+`;
 const styles = StyleSheet.create({
   buttonText: {
     fontSize: 18,
@@ -565,9 +692,7 @@ const styles = StyleSheet.create({
     flex: 1,
     resizeMode: 'stretch',
   },
-  container: {
-    flex: 2,
-  },
+
   headerBlk: {
     flex: 1,
   },
@@ -593,9 +718,7 @@ const styles = StyleSheet.create({
     marginTop: 40,
     resizeMode: 'contain',
   },
-  container: {
-    flex: 1,
-  },
+
   filedsOuter: {
     flex: 1,
     backgroundColor: '#FFFFFF',

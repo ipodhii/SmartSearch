@@ -1,3 +1,5 @@
+const UserView = require('./UserView');
+
 class AdviceView {
   constructor(advice) {
     let {
@@ -7,19 +9,27 @@ class AdviceView {
       country,
       rating,
       placeName,
+      placeId,
       description,
       email,
       phone,
+      date,
     } = advice;
-    this.user = user;
+    if (typeof user === 'object') {
+      this.user = new UserView(user);
+    } else {
+      this.user = user;
+    }
     this.type = type;
     this.city = city;
     this.country = country;
     this.rating = rating;
     this.placeName = placeName;
+    this.placeId = placeId;
     this.description = description;
     this.email = email;
     this.phone = phone;
+    this.date = date;
   }
 }
 

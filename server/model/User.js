@@ -4,6 +4,14 @@ const Joi = require('joi');
 const {Schema} = mongoose;
 
 const userSchema = new Schema({
+  name: {
+    type: String,
+    required: true,
+  },
+  lastName: {
+    type: String,
+    required: true,
+  },
   phone: {
     type: String,
     required: true,
@@ -46,6 +54,8 @@ const User = mongoose.model('users', userSchema);
 
 function userValidation(user) {
   const schema = {
+    name: Joi.string(),
+    lastName: Joi.string(),
     email: Joi.string(),
     phone: Joi.string().min(10),
     password: Joi.string()
