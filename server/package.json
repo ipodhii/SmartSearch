@@ -17,7 +17,7 @@
     "@babel/node": "^7.8.7",
     "@babel/preset-env": "^7.9.6",
     "@hapi/joi": "^17.0.2",
-    "bcrypt": "^3.0.7",
+    "bcrypt": "^5.0.0",
     "bluebird": "^3.7.2",
     "compression": "^1.7.4",
     "config": "^3.3.1",
